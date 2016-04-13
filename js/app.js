@@ -644,12 +644,6 @@ $('#importFile').on('change', function() {
   $('.alert').hide();
 });
 
-$('#importPasswordless').on('change', function(){
-  var checked = $("#importPasswordless").prop('checked');
-  $('#password').attr('disabled', checked);
-  if( checked ) $('#password').val('');
-});
-
 $('#sender').on('change', function() {
   senderHasChanged();
 });
@@ -697,21 +691,9 @@ function updateProgress( pct ) {
  */
 $('#importWallet').click( function() {
 
-  showProgress();
-
   var address = '';
-  var password;
-
-  if ( $('#importPasswordless').prop('checked') ) {
-    password = '';
-  } else {
-    password = $('#password').val();
-    if( !password ) {
-      $('.alert').text('Please provide a password or select \'No password\'.').show();
-      console.log('');
-      return;
-    }
-  }
+  var password = $('#password').val();
+  
 
   var reader = new FileReader();
   reader.onload = function(evt) {
@@ -724,11 +706,12 @@ $('#importWallet').click( function() {
     }
 
     console.log("loaded JSON wallet file");
-
+  
     if( !worker ) {
       setupWorker();
     }
 
+    showProgress();
     worker.postMessage({
       action: 'import',
       json: json,
@@ -748,9 +731,6 @@ $('#importWallet').click( function() {
 });
 
 function setupWorker() {
-  if( worker ) {
-    return;
-  }
 
   worker = new Worker('js/wallet-worker.js');
   worker.addEventListener('message', function (event) {
@@ -762,11 +742,12 @@ function setupWorker() {
     } else if (data.action === 'error') {
       $('.alert').show().text(data.error);
       showWalletModal();
-
+      console.log('error importing wallet');
     } else if (data.action === 'imported') {
       if (data.privateKey === null) {
         $('.alert').show().text('Incorrect password');
         showWalletModal();
+        console.log('incorrect password');
       } else {
         console.log('completed wallet import');
         updateProgress('100');

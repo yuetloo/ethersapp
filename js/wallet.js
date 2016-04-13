@@ -38,7 +38,11 @@ Wallet.prototype.importFromJson = function (json, password, callback){
 
   if( !json ) throw new Error('json is missing');
   if( json === String ) {
-    json = JSON.parse(json);
+    try {
+      json = JSON.parse(json);
+    } catch (err) {
+      throw new Error("Invalid JSON Wallet");
+    }
   }
   var ciphertext = Wallet.getValue(json, "crypto/ciphertext");
   if( !ciphertext ) throw new Error('ciphertext is missing in json file.'); 
@@ -69,7 +73,7 @@ Wallet.prototype.importFromJson = function (json, password, callback){
 
   // Derive the key, calling the callback periodically with progress updates
   
-  if( !password ) throw new Error('password is missing.'); 
+  if( !password ) password = '';
   var passwordBytes = new Buffer(password, 'utf8');
   var derivedKey = scryptsy(passwordBytes, salt, N, r, p, dkLen, function(progress) {
     if (progress) {
