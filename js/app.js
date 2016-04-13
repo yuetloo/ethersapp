@@ -80,6 +80,7 @@ $('#networkid').on('change', function(){
     networkId.addClass("testnet"); 
     $("#contractMainnet").hide();
     $("#contractTestnet").show();
+    searchContract();
 
   } else {
     console.log("network changed to: " + networkId.val());
@@ -561,6 +562,12 @@ function searchContract() {
   $("#functionDetail").hide();
   
   console.log("addr = " + addr );
+  if( !Web3.prototype.isAddress(addr) ) {
+    $('.contract.error').text('Contract address is invalid!').show();
+    $(".searchResult").show(); 
+    return false;
+  }
+  
   
   getContractAbi (addr, function(response){
     if( response )
@@ -570,7 +577,7 @@ function searchContract() {
     }
     else
     {
-       $(".contract.error").show();
+       $(".contract.error").text('Contract source is not available!').show();
     }
   
     $(".searchResult").show(); 
