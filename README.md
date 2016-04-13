@@ -5,7 +5,7 @@
 ethersapp was created to help me learn about ethereum contracts.  I was inspired to create this tool after attending a few ethereum contract introduction meetup sessions by [Ledger Labs] (https://ledgerlabs.io).
 
 # Security
-Please note that ethersapp has not been through a comprehensive security review. It is an experimental software intended for small amount of Ether to be used to experiment with Ethereum smart contracts. Only functions in a smart contract that require a transaction require Ether to run.  Constant functions labeled with a <span style='color:white; background-color:orange; border-radius:50%; padding-right:2px; padding-left:2px; margin-right: 5px;'>C</span> beside the function name do not require Ether to run.
+Please note that ethersapp has not been through a comprehensive security review. It is an experimental software intended for small amount of Ether to be used to experiment with Ethereum smart contracts. Only functions in a smart contract that require a transaction require Ether to run.  Constant functions labeled with a **"C"** beside the function name do not require Ether to run.
 
 # Usage
 1. Select a network (testnet vs. mainnet) from the dropdown list on the top right corner of the page
