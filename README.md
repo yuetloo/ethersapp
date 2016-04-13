@@ -38,3 +38,7 @@ Please note that ethersapp has not been through a comprehensive security review.
 # License
 MIT License.
 
+# Contribution
+Contribution is welcomed at the following Ethereum address:
+
+Ethereum - 0xdeabfa77c044107d78128baba8beee8380d833e4
