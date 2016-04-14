@@ -21,6 +21,8 @@ Please note that ethersapp has not been through a comprehensive security review.
 5. Fill in 'Sender Address'
    'Sender Address' is optional for constant functions. You can manually enter the 'Sender Address' value in the input box for constant functions. For non-constant (transactional) functions, you must click the 'Wallet' button to import a wallet with private key and the 'Sender Address' will be populated automatically.
 
+   Currently, you can only import the file containing Geth JSON V3 format.  You can generate the wallet file using Geth or [https://ethereumwallet.com](https://ethereumwallet.com).
+
    The following fields will be populated automatically with value from etherscan.io:
    * Balance - this field is for information only, it is not sent in the transaction
                For testnet, the 'Add More' button will be available to request more Ether from [ZeroGox] (https://zerogox.com/ethereum/wei_faucet).
