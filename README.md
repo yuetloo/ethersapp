@@ -11,7 +11,8 @@ Please note that ethersapp has not been through a comprehensive security review.
 1. Select a network (testnet vs. mainnet) from the dropdown list on the top right corner of the page
 
 2. Select or enter the contract address to search for a contract
-   Only a few contracts with ABI is available in testnet, configured in the js/abi.js file.
+
+   For testnet, you can add or delete contract ABI from the dropdown list. There are 3 defalt ABI and they cannot be deleted.
    For mainnet, you can get the list of contracts with source and ABI from [https://etherchain.org/contracts](https://etherchain.org/contracts).
 
 3. Select a function to work with from the left hand side panel 
@@ -19,13 +20,14 @@ Please note that ethersapp has not been through a comprehensive security review.
 4. Fill in function input parameter values
 
 5. Fill in 'Sender Address'
+
    'Sender Address' is optional for constant functions. You can manually enter the 'Sender Address' value in the input box for constant functions. For non-constant (transactional) functions, you must click the 'Wallet' button to import a wallet with private key and the 'Sender Address' will be populated automatically.
 
    Currently, you can only import the file containing Geth JSON V3 format.  You can generate the wallet file using Geth or [https://ethereumwallet.com](https://ethereumwallet.com).
 
    The following fields will be populated automatically with value from etherscan.io:
    * Balance - this field is for information only, it is not sent in the transaction
-               For testnet, the 'Add More' button will be available to request more Ether from [ZeroGox] (https://zerogox.com/ethereum/wei_faucet).
+               For testnet, the 'Add More' button will be available to request more Ether from Parity: http://icarus.parity.io/rain/{your_address}
 
    * Nonce - this is auto populated from etherscan.io
    * Gas Price - this is auto populated from [etherchain] (https://etherchain.org/api/gasPrice)  
