@@ -67,7 +67,9 @@ $(document).ready(function(){
   var networkId = $("#networkid").val();
   httpClient = new HttpClient(networkId);
   if( networkId === "testnet" ){
+    loadAbiFromStore();
     loadContracts();
+    showAbiButtons();
     searchContract();
   } 
 });
@@ -80,6 +82,7 @@ $('#networkid').on('change', function(){
     networkId.addClass("testnet"); 
     $("#contractMainnet").hide();
     $("#contractTestnet").show();
+    showAbiButtons();
     searchContract();
 
   } else {
@@ -88,6 +91,7 @@ $('#networkid').on('change', function(){
     networkId.removeClass("testnet"); 
     $("#contractMainnet").css('display', 'inline');
     $("#contractTestnet").hide();
+    hideAbiButtons();
     $(".searchResult").hide(); 
   }
 
@@ -473,7 +477,7 @@ function GetFunction( functionName )
   
   $('#openWallet').on('click', showWalletModal);
   $('#btnCall').on('click', callFunction);
-  $('.txInput').on('change', inputIsValid);
+  $('.txInput').on('change', handleInputChange);
   $("#functionDetail").show();
   getBalance();
   return false;
@@ -651,18 +655,30 @@ $('#importFile').on('change', function() {
   $('.alert').hide();
 });
 
-$('#sender').on('change', function() {
-  senderHasChanged();
-});
-
 function senderHasChanged(){
   getBalance();
   getNonce();
+
+  var addEtherButton = $('#btnAddEther');
+  if( addEtherButton) {
+    addEtherButton.removeClass('hidden');
+    addEtherButton.attr('href', getParityUrl());
+  }
+}
+
+function getParityUrl(senderAddr) {
+  if( !senderAddr ) {
+    senderAddr = $('#sender').val();
+  }
+  var addr = 'http://icarus.parity.io/rain/' +  senderAddr;
+  return addr;
 }
 
 function loadContracts() {
   var address;
   var name;
+  
+  $("#contractTestnet").empty();
   for( var i = 0; i < abiList.length; i++ ) {
     address = abiList[i].address;
     name = abiList[i].name + ' @ ' + address;
@@ -788,8 +804,28 @@ $('#filter').keyup(function() {
  * search for the contract after user selected different contract from the dropdown list
  */
 $('#contractTestnet').change(function() {
+  showAbiButtons();
   searchContract();
 });
+
+function hideAbiButtons() { 
+  $('#btnAddAbi').addClass('hidden');
+  $('#btnDelAbi').addClass('hidden');
+}
+
+function showAbiButtons() {
+  $('#btnAddAbi').removeClass('hidden');
+
+  var address = getContractAddress();
+  var abiData = abiList.filter(function(abi) {
+       return(abi.address === address);
+     });
+  if( abiData[0].donotdelete ) {
+    $('#btnDelAbi').addClass('hidden');
+  } else {
+    $('#btnDelAbi').removeClass('hidden');
+  }
+}
 
 /**
  * return the contract address based on the networkid selected
@@ -818,6 +854,13 @@ function navItemClicked(event) {
   GetFunction(event.target.text);
 }
 
+function handleInputChange(event) {
+  inputIsValid(event);
+
+  if( this.id === 'sender' ) {
+    senderHasChanged();
+  }
+}
 
 function inputIsValid(event) {
   var inputField = $('#' + event.target.id);
@@ -855,14 +898,165 @@ function inputIsValid(event) {
 }
 
 /**
- *  Add the 'Add More' button to redirect to zerogox.com to get 
- *  some ethers
+ *  Add the 'Add More' button to redirect to parity.io to get more ethers
  */
 function buildAddMoreTag(inputTable) {
   var networkid = $('#networkid').val();
   if( networkid === 'testnet' ) {
-    var url = 'https://zerogox.com/ethereum/wei_faucet';
-    inputTable.push('<td><a class="btn" target="_blank" href="'+ url +'">Add More</a></td>');
+    var addr = wallet.getAddressFromPrivateKey();
+    if( addr ) {
+      var url = getParityUrl( addr );
+      inputTable.push('<td><a id="btnAddEther" class="btn" target="_blank" href="'+ url +'">Add More</a></td>');
+    } else {
+      /* add a placeholder button until we get an address */
+      inputTable.push('<td><a id="btnAddEther" class="btn hidden" target="_blank">Add More</a></td>');
+    }
   }
 }
 
+document.getElementById('btnAddAbi').onclick = function(){
+  $('#btnSaveAbi').addClass('disabled');
+  document.getElementById('modalAddAbi').style.display = 'block';  
+}
+
+document.getElementById('btnCancelAddAbi').onclick = function(){
+  $('#modalAddAbi').fadeOut(300);
+  $('#formAddAbi input').val('');
+  $('#formAddAbi textarea').val('');
+  $('#formAddAbi .alert').text('');
+}
+
+$('#newContractAddress').on('change', function() {
+  var address = $('#newContractAddress').val();
+  if( !address ) {
+    $('#alertAddress').text('Address is mandatory');
+    return;
+  }
+  for( var i = 0; i < abiList.length; i++ ) {
+    if( address === abiList[i].address ) {
+      $('#alertAddress').text('Address already exists');
+      console.log('address already exists');
+      return;
+    }
+  }
+
+  $('#alertAddress').text('');
+  if( $('#alertName').text().length === 0 &&
+      $('#alertAbi').text().length === 0 ) {
+    $('#btnSaveAbi').removeClass('disabled');
+  } else {
+    $('#btnSaveAbi').addClass('disabled');
+  }
+});
+
+$('#newContractName').on('change', function() {
+  var name = $('#newContractName').val();
+  if( !name ) {
+    $('#alertName').text('Name is mandatory');
+    return;
+  }
+  $('#alertName').text('');
+  if( $('#alertAddress').text().length === 0 &&
+      $('#alertAbi').text().length === 0 ) {
+    $('#btnSaveAbi').removeClass('disabled');
+  } else {
+    $('#btnSaveAbi').addClass('disabled');
+  }
+});
+
+$('#newContractAbi').on('change', function() {
+  var abiString = $('#newContractAbi').val();
+
+  if( !abiString || abiString.length === 0 ) {
+    $('#alertAbi').text('Abi is mandatory');
+    $('#btnSaveAbi').addClass('disabled');
+    return;
+  }
+  console.log('newContractAbi:', abiString);
+  try {
+    var abi = JSON.parse(abiString);
+    if( !abi) {
+      $('#alertAbi').text('Contract ABI is mandatory');
+      $('#btnSaveAbi').addClass('disabled');
+      return;
+    }
+  }
+  catch (error) {
+    $('#alertAbi').text('ABI is not in valid JSON format.');
+    $('#btnSaveAbi').addClass('disabled');
+    return;
+  }
+  $('#alertAbi').text('');
+  if( $('#alertAddress').text().length === 0 &&
+      $('#alertName').text().length === 0 ) {
+    $('#btnSaveAbi').removeClass('disabled');
+  } 
+}
+);
+
+document.getElementById('btnSaveAbi').onclick = function(){
+  
+  var newContract = {};
+  newContract.address = $('#newContractAddress').val();
+  newContract.name = $('#newContractName').val();
+  newContract.donotdelete = false;
+  var abiString = $('#newContractAbi').val();
+  try {
+    newContract.abi = JSON.parse(abiString);
+    if( !newContract.abi) {
+      $('#alertAbi').text('Contract ABI is mandatory');
+      $('#btnSaveAbi').addClass('disabled');
+      return;
+    }
+  }
+  catch (error) {
+    $('#alertAbi').text('ABI is not in valid JSON format.');
+    $('#btnSaveAbi').addClass('disabled');
+    return;
+  }
+
+  abiList.push(newContract);
+  saveAbiToStore();
+  loadContracts();
+  $('#contractTestnet').val(newContract.address);
+  showAbiButtons();
+  searchContract();
+  $('#modalAddAbi').fadeOut(300);
+  $('#formAddAbi input').val('');
+  $('#formAddAbi textarea').val('');
+  $('#formAddAbi .alert').text('');
+}
+
+document.getElementById('btnDelAbi').onclick = function() {
+  var address = getContractAddress();
+  for( var i = 0; i < abiList.length; i++ ){
+    if( address === abiList[i].address ) {
+      abiList.splice(i, 1);
+      saveAbiToStore();
+      loadContracts();
+      searchContract();
+      showAbiButtons();
+    }
+  }
+}
+
+function saveAbiToStore(){
+  var userAbis = abiList.filter(function(abi){ return abi.donotdelete === false; });
+  console.log('saveAbiTotore', userAbis);
+  localStorage.setItem('ethersapp_abi', JSON.stringify(userAbis));
+}
+
+function loadAbiFromStore() {
+  var userAbiString = localStorage.getItem('ethersapp_abi');
+  console.log('loadAbiFromStore', userAbiString);
+  var userAbis;
+  try {
+    userAbis = JSON.parse(userAbiString);
+  } catch (error) {
+    console.log('loadAbiFromStore', error);
+  }
+
+  for( var i=0; i<userAbis.length; i++ ) {
+    abiList.push(userAbis[i]);
+  } 
+}

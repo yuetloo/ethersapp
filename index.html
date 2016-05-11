@@ -31,11 +31,49 @@
                </input>
                <a class='btn' id='btnSearch'>Search</a>
             </div>
+            <div class='contractGroup'>
             <select id="contractTestnet" 
                 class="cssContractAddress" >
             </select>
+            <div class='btnGroup'>
+              <a class='btn hidden' id='btnAddAbi'>Add</a>
+              <a class='btn hidden' id='btnDelAbi'>Delete</a>
+            </div>
+            </div>
            
             <div id="progressBar"></div>
+       </div>
+
+       <div id='modalAddAbi' class='modalDialog'>
+       <div id='formAddAbi'>
+          <div class='input-group'>
+            <div>Contract Address:
+              <span id='alertAddress' class='error'></span>
+            </div>
+            <input id='newContractAddress'></input>
+          </div>
+          <div class='input-group'>
+            <div>Contract Name:
+              <span id='alertName' class='error'></span>
+            </div>
+            <input id='newContractName'></input>
+          </div>
+          <div class='input-group'>
+            <div>Abi:
+              <span id='alertAbi' class='error'></span>
+            </div>
+            <textarea id='newContractAbi' class='input-abi'></textarea>
+          </div> 
+          <div class="cssSmallSpacer"></div>
+          <div class="display-inline col-40-pct pull-left">
+            <div id='btnSaveAbi' class="btn">Save</div>
+            <div id='btnCancelAddAbi' class="btn">Cancel</div>
+          </div>
+          <div class="display-inline col-60-pct pull-right">
+            <div id='addAbiAlert' class="alert wrap display-inline"></div>
+          </div>
+          <div class='clear-both'></div>
+       </div>
        </div>
 
        <div class="searchResult">
@@ -50,7 +88,7 @@
        <div class="container">
           <div id="nav">
               <div>
-                  <input id="filter" placeholder="search"/>
+                  <input id="filter" placeholder="Search function"/>
               </div>
               <div id="functions"></div>
           </div>
