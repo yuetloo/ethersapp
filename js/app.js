@@ -1052,11 +1052,13 @@ function loadAbiFromStore() {
   var userAbis;
   try {
     userAbis = JSON.parse(userAbiString);
+    if( userAbis ) {
+      for( var i=0; i<userAbis.length; i++ ) {
+        abiList.push(userAbis[i]);
+      } 
+    }
   } catch (error) {
     console.log('loadAbiFromStore', error);
   }
 
-  for( var i=0; i<userAbis.length; i++ ) {
-    abiList.push(userAbis[i]);
-  } 
 }
