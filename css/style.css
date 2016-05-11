@@ -78,12 +78,12 @@ a.btn {
   font-size: 12px;
 }
   
-a.btn:hover {
+.btn:hover {
   background: black;
   color: orange;
 }
 
-a.disabled {
+.disabled {
   pointer-events: none;
   cursor: default;
   background: gray;
@@ -276,7 +276,7 @@ a
   padding: 0px 10px;
   font-size:14px;
   border: 2px solid #dadada;
-  margin: 13px 0px 0px 5px;
+  margin: 13px 3px 0px 5px;
   border-radius: 7px;
 }
 
@@ -398,4 +398,27 @@ a
   border-color: red;
 }
 
+.btnGroup .btn {
+  height: 35px; 
+  line-height: 35px; 
+  padding: 0px 10px;
+  font-size:12px;
+}
 
+.btnGroup {
+  padding: 16px;
+}
+
+.input-abi {
+  height: 100px; 
+  width: 100%;
+  resize: vertical; 
+}
+
+.input-group input {
+  width: 100%;
+}
+
+.input-group {
+  margin-top: 10px;
+}
