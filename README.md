@@ -1,5 +1,5 @@
 # ethersapp 
-[ethersapp](https://yuetloo.github.io/ethersapp/) is an open source, javascript, client-side tool for exploring the Ethereum smart contracts on testnet and mainnet.  For testnet, the contract ABI is maintained in the js/abi.js file.  For mainnet, the ABI is retrieved from [etherchain.org](https://etherchain.org) API
+[ethersapp](https://yuetloo.github.io/ethersapp/) is an open source, javascript, client-side tool for exploring the Ethereum smart contracts on testnet and mainnet.  The contract ABI is maintained in the js/abi.js file. Users can add and delete contract ABI manually using the add/delete buttons and the ABI added manaully will be stored in the local storage. 
 
 # Purpose
 ethersapp was created to help me learn about ethereum contracts.  I was inspired to create this tool after attending a few ethereum contract introduction meetup sessions by [Ledger Labs] (https://ledgerlabs.io).
@@ -10,10 +10,9 @@ Please note that ethersapp has not been through a comprehensive security review.
 # Usage
 1. Select a network (testnet vs. mainnet) from the dropdown list on the top right corner of the page
 
-2. Select or enter the contract address to search for a contract
+2. Select the contract from the drop down list
 
-   For testnet, you can add or delete contract ABI from the dropdown list. There are 3 defalt ABI and they cannot be deleted.
-   For mainnet, you can get the list of contracts with source and ABI from [https://etherchain.org/contracts](https://etherchain.org/contracts).
+   The dropdown list is initialized with the list in abi.js. There ABI loaded from abi.js cannot be deleted. Lists of verified contracts and their ABI can be obtained from blockchain explorers like [https://etherscan.io/contractsVerified/](https://etherscan.io/contractsVerified/) and [https://etherchain.org/contracts](https://etherchain.org/contracts).
 
 3. Select a function to work with from the left hand side panel 
 
@@ -43,6 +42,6 @@ Please note that ethersapp has not been through a comprehensive security review.
 MIT License.
 
 # Contribution
-Contribution is welcomed at the following Ethereum address:
+Contribution is welcome at the following Ethereum address:
 
 `0xdeabfa77c044107d78128baba8beee8380d833e4`
