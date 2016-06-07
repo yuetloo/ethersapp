@@ -66,38 +66,30 @@ $(document).ready(function(){
   wallet = new Wallet();
   var networkId = $("#networkid").val();
   httpClient = new HttpClient(networkId);
-  if( networkId === "testnet" ){
-    loadAbiFromStore();
-    loadContracts();
-    showAbiButtons();
-    searchContract();
-  } 
+  loadAbiList(networkId);
+  loadContracts();
+  showAbiButtons();
+  searchContract();
 });
 
 
 $('#networkid').on('change', function(){
   var networkId = $("#networkid");
-  if( networkId.val() === "testnet") {
-    console.log("testnet selected");
-    networkId.addClass("testnet"); 
-    $("#contractMainnet").hide();
-    $("#contractTestnet").show();
-    showAbiButtons();
-    searchContract();
-
-  } else {
-    console.log("network changed to: " + networkId.val());
-    $("#contractAddress").val("");
+  var network= 'testnet'; 
+  if( networkId.val() === "mainnet") {
     networkId.removeClass("testnet"); 
-    $("#contractMainnet").css('display', 'inline');
-    $("#contractTestnet").hide();
-    hideAbiButtons();
-    $(".searchResult").hide(); 
+    network= 'mainnet';
+  } else {
+    networkId.addClass("testnet"); 
   }
+  loadAbiList(network);
+  loadContracts();
+  showAbiButtons();
+  searchContract();
 
   updateTxData('sender', '');
   updateTxData('nonce', '');
-  httpClient.setUrl(networkId.val());
+  httpClient.setUrl(network);
   wallet.clearPrivateKey();
 });
 
@@ -305,14 +297,8 @@ function getContractAbi (addr, callback) {
   function matchesAddress(json) {
     return( json.address === addr );
   }
-  if( networkid === "testnet") {
-    var abi = abiList.filter(matchesAddress)[0];
-    callback(abi);
-  } else {
-    getSource(addr, function(response){
-      callback(response);
-    });
-  }
+  var abi = abiList.filter(matchesAddress)[0];
+  callback(abi);
 }
 
 function getFunctionAbi (abi, functionName) {
@@ -393,19 +379,21 @@ function parseRawResponse( abi, rawData ) {
 
   if( abi.constant ){
     result.push("<p>Parsed Result:</p>");
-    result.push("<table>");
 
     var types = getAbiTypes(abi.outputs); 
     var rawBytes = ethUtil.stripHexPrefix(rawData);
     console.log( 'parseRawResponse types', types, rawBytes);
-    data = coder.decodeParams(types, rawBytes);
-    for (i=0;i<abi.outputs.length;i++)
-    {
-      result.push("<tr>");
-      buildOutputRow( result, abi.outputs[i], data[i] );
-      result.push("</tr>");
+    if( rawBytes ) {
+       result.push("<table>");
+       data = coder.decodeParams(types, rawBytes);
+       for (i=0;i<abi.outputs.length;i++)
+       {
+         result.push("<tr>");
+         buildOutputRow( result, abi.outputs[i], data[i] );
+         result.push("</tr>");
+       }
+       result.push("</table>");
     }
-    result.push("</table>");
   } else {
     buildTxHashRow( result, rawData );
   } 
@@ -500,7 +488,7 @@ function buildOutputRow( outputTable, abi, rawData )
     fieldName = "result";
   }
   var fieldValue = rawData;
-  var inputField = '<input type="text" value="' + fieldValue +'"/>';
+  var inputField = '<input type="text" value="' + fieldValue +'" readonly/>';
   var parType = '<span class="paramType">' + abi.type + '</span>';
   outputTable.push("<td>" + fieldName + ":</td>");
   outputTable.push("<td>" + inputField + parType + "</td>");
@@ -615,7 +603,7 @@ function buildContractName( addr ) {
 }
  
 function buildSourceTag( addr ) {
-  var sourceLink = 'https://etherchain.org/account/' + addr+'#code';
+  var sourceLink = 'https://etherscan.io/address/' + addr+'#code';
   var sourceTag = '(<a href="'+sourceLink+'" target="_blank">source</a>)';
   return sourceTag;
 }
@@ -678,11 +666,11 @@ function loadContracts() {
   var address;
   var name;
   
-  $("#contractTestnet").empty();
+  $("#contractDropdown").empty();
   for( var i = 0; i < abiList.length; i++ ) {
     address = abiList[i].address;
     name = abiList[i].name + ' @ ' + address;
-    $("#contractTestnet").append('<option value="' + address + '">' + name  + '</option>');
+    $("#contractDropdown").append('<option value="' + address + '">' + name  + '</option>');
   }
 }
 
@@ -803,7 +791,7 @@ $('#filter').keyup(function() {
 /** 
  * search for the contract after user selected different contract from the dropdown list
  */
-$('#contractTestnet').change(function() {
+$('#contractDropdown').change(function() {
   showAbiButtons();
   searchContract();
 });
@@ -820,9 +808,9 @@ function showAbiButtons() {
   var abiData = abiList.filter(function(abi) {
        return(abi.address === address);
      });
-  if( abiData[0].donotdelete ) {
-    $('#btnDelAbi').addClass('hidden');
-  } else {
+  $('#btnDelAbi').addClass('hidden');
+  if( abiData && abiData.length > 0 && !abiData[0].donotdelete ) 
+  {
     $('#btnDelAbi').removeClass('hidden');
   }
 }
@@ -832,12 +820,7 @@ function showAbiButtons() {
  */
 function getContractAddress() {
   var address;
-  var networkid = $('#networkid').val();
-  if( networkid === 'mainnet') {
-    address = $('#contractAddress').val();
-  } else {
-    address = $('#contractTestnet').val();
-  }
+  address = $('#contractDropdown').val();
   return address;
 }
 
@@ -1018,7 +1001,7 @@ document.getElementById('btnSaveAbi').onclick = function(){
   abiList.push(newContract);
   saveAbiToStore();
   loadContracts();
-  $('#contractTestnet').val(newContract.address);
+  $('#contractDropdown').val(newContract.address);
   showAbiButtons();
   searchContract();
   $('#modalAddAbi').fadeOut(300);
@@ -1046,8 +1029,19 @@ function saveAbiToStore(){
   localStorage.setItem('ethersapp_abi', JSON.stringify(userAbis));
 }
 
-function loadAbiFromStore() {
-  var userAbiString = localStorage.getItem('ethersapp_abi');
+function loadAbiList(networkId) {
+  if( networkId === 'mainnet' ) {
+    console.log('load from mainnet');
+    abiList = abiListMainnet;
+  } else {
+    abiList = abiListTestnet;
+  }
+  loadAbiFromStore(networkId);
+}
+
+function loadAbiFromStore(networkId) {
+  var storeName = (networkId === 'mainnet'? 'ethersapp_abi_m' : 'ethersapp_abi');
+  var userAbiString = localStorage.getItem(storeName);
   console.log('loadAbiFromStore', userAbiString);
   var userAbis;
   try {

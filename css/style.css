@@ -334,11 +334,8 @@ a
 .networkPane {
   float: right;
 }
-#contractMainnet {
-   display: none;
-}
 
-#contractTestnet {
+#contractDropdown {
    display: inline;
 }
   
