@@ -588,19 +588,19 @@ function buildContent()
  
 function buildContractName( addr ) {
   var networkid = $("#networkid").val();
-  if( networkid === "testnet" ) {
-    $("#contractPane").hide();
-  } else {
-    var sourceTag = buildSourceTag( addr );
-    $("#contractName").text(global_abi.name);
-    $("#contractSource").html(sourceTag);
-    console.log("source tag: " + sourceTag);
-    $("#contractPane").show();
-  }
+  var sourceTag = buildSourceTag( networkid, addr );
+  $("#contractName").text(global_abi.name);
+  $("#contractSource").html(sourceTag);
+  console.log("source tag: " + sourceTag);
+  $("#contractPane").show();
 }
  
-function buildSourceTag( addr ) {
-  var sourceLink = 'https://etherscan.io/address/' + addr+'#code';
+function buildSourceTag( network, addr ) {
+  var testnetPrefix = '';
+  if( network === 'testnet' ) {
+    testnetPrefix = 'testnet.' 
+  }
+  var sourceLink = 'https://' + testnetPrefix +'etherscan.io/address/' + addr+'#code';
   var sourceTag = '(<a href="'+sourceLink+'" target="_blank">source</a>)';
   return sourceTag;
 }
