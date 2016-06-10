@@ -62,7 +62,7 @@ a.tooltip:hover span{
 a.tooltip span
 {
   border-radius:4px;
-   box-shadow: 5px 5px 8px #CCC;
+  box-shadow: 5px 5px 8px #CCC;
 }
  
 .btn {
@@ -81,6 +81,7 @@ a.btn {
 .btn:hover {
   background: black;
   color: orange;
+  cursor: pointer;
 }
 
 .disabled {
@@ -145,7 +146,7 @@ a.btn {
   margin: auto;
 }
 
-h1, h2 {
+h1, h2, h3 {
   color: #336;
   font-weight: normal;
   font-family: "Open Sans", Arial, sans-serif;
@@ -162,9 +163,8 @@ h1, h2 {
   text-shadow: 0 1px 0 #fff;
   background-color: #eee;
   border: 1px solid #ccc;
-  border-radius: 0px 4px 4px 0px;
-  border-left-style: none;
-  float: left;
+  border-radius: 4px;
+  text-align: center;
 }
 
 input {
@@ -221,18 +221,31 @@ table {
   border: 1px solid #eee;
 }
 
-table input {
-  height: 20px;
-  padding: 4px 6px;
-  font-size: 12px;
+.param {
+  margin-bottom: 5px; 
+}
+
+.txInput {
+  height: 45px;
+  font-size: 15px;
+  line-height: 25px;
+  border-radius: 1px; 
   border: 1px solid #ccc;
-  line-height: 20px;
-  white-space: nowrap;
-  border-radius: 7px 0 0 7px;
-  min-width: 300px;
-  width: auto;
-  float: left;
-  margin-right: 0;
+  padding: 5px;
+  margin: 0 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#btnCall {
+  height: 40px;
+  line-height: 35px;
+  font-size: 15px;
+  padding: 0 20px;
+}
+
+textarea {
+   resize: vertical;
 }
  
 #nav ul {

@@ -384,15 +384,11 @@ function parseRawResponse( abi, rawData ) {
     var rawBytes = ethUtil.stripHexPrefix(rawData);
     console.log( 'parseRawResponse types', types, rawBytes);
     if( rawBytes ) {
-       result.push("<table>");
        data = coder.decodeParams(types, rawBytes);
        for (i=0;i<abi.outputs.length;i++)
        {
-         result.push("<tr>");
          buildOutputRow( result, abi.outputs[i], data[i] );
-         result.push("</tr>");
        }
-       result.push("</table>");
     }
   } else {
     buildTxHashRow( result, rawData );
@@ -419,20 +415,17 @@ function GetFunction( functionName )
             
   var content = [];
   $('#functionName').text(fn.name);
-  content.push("<table>");
   for (i=0;i<fn.inputs.length;i++)
   {
     if( i == 0 )
     {
-      content.push("<tr>"); 
-      content.push('<td colspan="2">Function Parameters:</td>');
-      content.push("</tr>"); 
+      content.push('<h3>Function Parameters:</h3>');
     }
     buildInputRow( content, fn.inputs[i], i, fn.constant );
   }
   if( fn.inputs.length > 0 )
   {
-    content.push('<tr><td colspan="2"><span><hr></span></td></tr>');
+    content.push('<hr>');
   }
   if( fn.constant ) 
   {
@@ -454,7 +447,6 @@ function GetFunction( functionName )
     }
     buildInputRow( content, txData[i], i, fn.constant );
   }
-  content.push("</table>");
   content.push('<a class="btn" id="btnCall">')
   content.push( btnLabel + '</a>');
   content.push('<br><div id="resp" class="wrap"></div>');
@@ -488,10 +480,14 @@ function buildOutputRow( outputTable, abi, rawData )
     fieldName = "result";
   }
   var fieldValue = rawData;
-  var inputField = '<input type="text" value="' + fieldValue +'" readonly/>';
-  var parType = '<span class="paramType">' + abi.type + '</span>';
-  outputTable.push("<td>" + fieldName + ":</td>");
-  outputTable.push("<td>" + inputField + parType + "</td>");
+  var abiType = abi.type.toLowerCase();
+  var inputField = '<input type="text" value="' + fieldValue +'"' + '" class="txInput" readonly/>';
+  if( abiType === 'string' || abiType === 'bytes32') {
+    inputField = '<textarea type="text" class="txInput" readonly>'+ fieldValue + '</textarea>';
+  }
+  var parType = ' (' + abi.type + ')';
+  outputTable.push("<div class='param'>" + fieldName + parType + ":</div>");
+  outputTable.push("<div class='param'>" + inputField + "</div");
 }
 
 
@@ -521,19 +517,19 @@ function buildInputRow( inputTable, inputData, inputIndex, isConstant )
   var inputField = '<input type="text" id="' + fieldId + 
                         '" value="' + fieldValue +'" ' + 
                         readOnlyAttr +' class="txInput"/>';
-  var parType = '<span class="paramType">' + inputData.type + '</span>';
-  inputTable.push("<tr>");
-  inputTable.push("<td>" + fieldName + ":</td>");
-  inputTable.push("<td>" + inputField + parType + "</td>");
+  var parType = ' (' + inputData.type + ') ';
+  var walletButton = '';
+  var addMoreButton = '';
   if( fieldId === "sender" )
   {
-     inputTable.push('<td><a class="btn" id="openWallet">Wallet</a></td>');
+     walletButton = '<a class="btn" id="openWallet">Wallet</a>'; 
   } 
   else if ( fieldId === 'balance' )
   {
-     buildAddMoreTag(inputTable);
+     addMoreButton = buildAddMoreTag();
   }
-  inputTable.push("</tr>");
+  inputTable.push("<div class='param'>" + fieldName + parType + walletButton + addMoreButton +":</div>");
+  inputTable.push("<div class='param'>" + inputField + "</div>");
 }
 
 function showWalletModal() {
@@ -845,9 +841,25 @@ function handleInputChange(event) {
   }
 }
 
+function getInputType(inputId) {
+  var inputIndex = parseInt(inputId.replace('input', ''));
+  var functionName = $('#functionName');
+  var inputType = '';
+  var fn = getFunctionAbi(global_abi.abi, functionName);
+  for(var i = 0; i < fn.inputs.length; i++ )
+  {
+     if( i === inputIndex )
+     {
+        inputType = fn.inputs[i].type;
+        break;
+     }
+  } 
+  return inputType;
+}
+
 function inputIsValid(event) {
   var inputField = $('#' + event.target.id);
-  var inputType = inputField.nextAll('span:first').text();
+  var inputType = getInputType(event.target.id);
   var inputValue = inputField.val();
   console.log('inputIsValid', event.target.id, inputType);
   if( inputType === 'ether' || inputType === 'wei' ) {
@@ -883,18 +895,20 @@ function inputIsValid(event) {
 /**
  *  Add the 'Add More' button to redirect to parity.io to get more ethers
  */
-function buildAddMoreTag(inputTable) {
+function buildAddMoreTag() {
+  var emptyTag = '';
   var networkid = $('#networkid').val();
   if( networkid === 'testnet' ) {
     var addr = wallet.getAddressFromPrivateKey();
     if( addr ) {
       var url = getParityUrl( addr );
-      inputTable.push('<td><a id="btnAddEther" class="btn" target="_blank" href="'+ url +'">Add More</a></td>');
+      return '<a id="btnAddEther" class="btn" target="_blank" href="'+ url +'">Add More</a>';
     } else {
       /* add a placeholder button until we get an address */
-      inputTable.push('<td><a id="btnAddEther" class="btn hidden" target="_blank">Add More</a></td>');
+      return '<a id="btnAddEther" class="btn hidden" target="_blank">Add More</a>';
     }
   }
+  return emptyTag;
 }
 
 document.getElementById('btnAddAbi').onclick = function(){
