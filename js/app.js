@@ -67,6 +67,7 @@ $(document).ready(function(){
   var networkId = $("#networkid").val();
   httpClient = new HttpClient(networkId);
   loadAbiList(networkId);
+  loadAbiFromStore(networkId);
   loadContracts();
   showAbiButtons();
   searchContract();
@@ -1050,7 +1051,6 @@ function loadAbiList(networkId) {
   } else {
     abiList = abiListTestnet;
   }
-  loadAbiFromStore(networkId);
 }
 
 function loadAbiFromStore(networkId) {
@@ -1060,6 +1060,7 @@ function loadAbiFromStore(networkId) {
   var userAbis;
   try {
     userAbis = JSON.parse(userAbiString);
+    console.log('loadAbiFromStore', userAbis, abiList);
     if( userAbis ) {
       for( var i=0; i<userAbis.length; i++ ) {
         abiList.push(userAbis[i]);
