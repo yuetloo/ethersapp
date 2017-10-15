@@ -23,7 +23,7 @@ HttpClient.httpRequest = function( request ) {
  * set the API url based on the chosen network
  */
 HttpClient.prototype.setUrl = function (networkid) {
-  const URL_TESTNET = "https://testnet.etherscan.io/api";
+  const URL_TESTNET = "https://ropsten.etherscan.io/api";
   const URL_MAIN = "https://api.etherscan.io/api";
 
   this.url = URL_TESTNET;   
