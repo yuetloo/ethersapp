@@ -493,20 +493,6 @@
          event.stopPropagation();
       }
 
-      function selectFirstFunction() 
-      {
-         var functionList = document.getElementById("function-list");
-         var firstFunction = functionList.firstElementChild;
-         if( firstFunction ) 
-         {
-            firstFunction.click();
-         } 
-         else 
-         {
-            document.getElementById("function-content").style.display = "none"; 
-         }
-      }
- 
       function createContractDropDownElement(abi) {
          var item = document.createElement("div");
          item.textContent = abi.name + " - " + abi.address; 
