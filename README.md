@@ -1,5 +1,5 @@
 # ethersapp 
-[ethersapp](https://yuetloo.github.io/ethersapp/) is an open source, javascript, client-side tool for exploring the Ethereum smart contracts on testnet and mainnet.  The contract ABI is maintained in the js/abi.js file. Users can add and delete contract ABI manually using the add/delete buttons and the ABI added manaully will be stored in the local storage. The wallet is managed by [ethers.io] (https://github.com/ethers-io/ethers.io).  With the recent support for Metamask, the wallet interface in ethers.io can access/use the account managed in Metamask from Google Chrome.
+ethersapp is an open source, javascript, client-side tool for exploring the Ethereum smart contracts on testnet and mainnet.  The contract ABI is maintained in the js/abi.js file. Users can add and delete contract ABI manually using the add/edit/delete buttons and the ABI will be stored in the local storage of the user browser. The wallet is managed by [ethers.io](https://github.com/ethers-io/ethers.io).  With ethers.io support for Metamask, the app can access the account stored in Metamask from Google Chrome browser.
 
 To access mainnet, use the following URL: 
 [https://ethers.io/#!/app-link/yuetloo.github.io/ethersapp/](https://ethers.io/#!/app-link/yuetloo.github.io/ethersapp/)
