@@ -1,144 +1,1101 @@
 <!DOCTYPE html>
 <html>
 <head>
-   <meta charset="utf-8"/>
-   <title>EthersApp</title>
-   <link rel="stylesheet" type="text/css" href="css/style.css">
+   <title>Ethereum Contract Explorer</title>
+   <style>
+
+      body {
+         margin: 0;
+         padding: 0;
+         color: #3b3c3d;
+         background-color: white;
+         font-family: BlinkMacSystemFont, Segoe UI, Roboto, sans-serif, monospace;
+      }
+   
+      .row {
+         display: table;
+         width: 100%;
+      }
+
+      .row > div {
+         display: inline-block;
+      }
+
+      #main-page.fade-out {
+         opacity: 0;
+      }
+      
+      .card {
+         background-color: #f9f8f6;
+         border: 1px solid #ccc;
+         padding: 20px;
+         position: relative;
+         margin: 15px 0;
+         box-sizing: border-box;
+      }
+
+      .output.card {
+         margin-top: 60px;
+      }
+
+      .output.card:before {
+         content: "Output"; 
+         position: absolute;
+         top: -40px;
+         left: -1px;
+         padding: 10px;
+         border: 1px solid #ccc;
+         background-color: #f9f8f6;
+         box-sizing: border-box;
+         border-top-left-radius: 5px;
+         border-top-right-radius: 5px;
+      }
+
+      #contract-selection {
+         background-color: #f9f8f6;
+         padding: 20px;
+      }
+
+      .font-large {
+         font-size: 26px;
+         line-height: 34px
+      }
+
+      .pad-top20 {
+         padding-top: 20px;
+      }
+
+      .github-logo {
+         vertical-align: text-bottom;
+         display: inline-block;
+      }
+
+      .header {
+         font-size: 1em;
+         padding: 0 20px;
+      }
+
+      .header > div {
+         display: inline-block;
+         padding: 15px 0;
+         box-sizing: border-box;
+      }
+
+      .network-container {
+         float: right;
+      }
+
+      .input-wrapper input {
+         width: 100%;
+         outline: none;
+         box-sizing: border-box;
+         font-size: 14px;
+         position: relative;
+      }
+
+      .button {
+         color: #19B5FE;
+         margin: 0 5px;
+      }
+
+      .button:hover {
+         cursor: pointer;
+         color: #2574A9;
+      }
+
+      .button.btn-std:hover {
+         background-color: #2574A9;
+      }
+
+      .button.btn-std {
+         background-color: #19B5FE;
+         width: 100px;
+         color: white;
+         border-radius: 5px;
+         text-align: center;
+         padding: 10px;
+      }
+
+      #contract {
+         font-size: 18px;
+         padding: 10px;
+         border-radius: 3px;
+         font-weight: 300;
+         margin: 0;
+         box-sizing: border-box;
+         transition: all 0.2s;
+         word-wrap: break-word;
+      }
+
+      .dropdown  {
+         position: relative;
+         margin: 10px 0;
+      }
+
+      .dropdown-btn {
+         padding: 10px;
+         box-sizing: border-box;
+         font-size: 18px;
+         float: right;
+         border-left: 1px solid #ccc;
+      }
+
+      .white-box {
+         border: 1px solid #ccc;
+         border-radius: 3px;
+         background-color: white;
+         border-sizing: border-box;
+      }
+ 
+      .hide {
+         display:none;
+      }
+
+      .dropdown-content {
+         position: absolute;
+         background-color: #f1f1f1;
+         overflow: auto;
+         z-index: 1;
+         width: 100%;
+         box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+         overflow-wrap: break-word;
+      }
+
+      .dropdown-content div {
+         padding: 10px;
+      }
+
+      .dropdown-content .active {
+         background-color: #ddd;
+      }
+
+      .dropdown-content div:hover {
+         background-color: #ddd;
+      }
+
+      #contract-details > div {
+         float: left;
+         padding: 20px 0;
+      }
+
+      #menu {
+         width: 25%;
+         box-sizing: border-box;
+         background: #fff;
+         min-height: 90vh;
+      }
+
+      #menu .caption {
+         font-weight: bold;
+      }
+
+      #menu > div {
+         margin-right: 15px;
+      }
+
+      #filterer {
+         width: 100%;
+         font-size: 1em;
+         border-radius: 50px;
+         padding: 6px 12px;
+         border: solid 1px #ccc;
+         margin-bottom: 10px;
+         box-sizing: border-box;
+      }
+
+      #function-content {
+         width: 75%;
+         box-sizing: border-box;
+         background: #fff;
+         min-height: 90vh;
+         xborder-left: 1px solid #ccc;
+         margin: auto;
+      }
+
+      #function-content > div {
+         margin-left: 15px;
+      }
+ 
+      #function-list {
+         margin-top: 5px;
+         height: 90vh;
+         overflow-y: auto;
+      }
+
+      #function-list > div {
+         padding: 0 5px;
+         margin: 5px 0;
+         overflow-wrap: break-word;
+         line-height: 21px;
+         font-size: 14px;
+      }
+
+      #function-list > div:hover {
+         color: #19B5FE;
+         cursor: pointer;
+      }
+
+      #function-list > .selected {
+         border-left: solid #19B5FE 3px; 
+         font-weight: bold;
+      }
+
+      #function-name { 
+         font-size: 23px;
+         word-wrap: break-word;
+      }
+
+      #function-name.setter:after { 
+         content: '\21AA setter - requires gas to run';
+         display: block;
+         font-size: 12px;
+         color: #888;
+      }
+
+      .input-row {
+         padding: 0 0 10px;
+         box-sizing: border-box;
+      }
+      
+      .input-row input {
+         padding: 10px 5px;
+         font-size: 0.8em;
+         width: 100%;
+         box-sizing: border-box;
+      }
+
+      #modal {
+         position: absolute;
+         top: 0;
+         right: 0;
+         left: 0;
+         z-index: 10;
+         background: #000;
+         transform: scale(0);
+         transition: all 0.6s;
+      }
+
+      #modal.fade-in {
+         transform: scale(1);
+      }
+
+      .modal-content {
+          width: 100%;
+          height: 100%;
+          padding: 0 20px;
+          box-sizing: border-box;
+          background: #fff;
+      }
+
+      #modal .caption {
+          padding: 5px 0;
+          font-size: 1.2em;
+          opacity: 0;
+      }
+
+      #modal.del .caption {
+          padding: 20px 0;
+          opacity: 1;
+      }
+
+      textarea {
+          width: 100%;
+          height: 142px;
+          margin-bottom: 8px;
+          box-sizing: border-box;
+      }
+
+      .spinner.show {
+         border: 10px solid #f3f3f3;
+         border-top: 10px solid #3498db;
+         border-radius: 50%;
+         width: 50px;
+         height: 50px;
+         margin: 50px;
+         animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+         0%   { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+      }
+
+      .error {
+         opacity: 0;
+         color: red;
+         font-size: 13px;
+      }
+
+      .container {
+         padding: 0 20px;
+      }
+
+      @media only screen and (max-width: 600px) {
+         #contract {
+            font-size: 14px;
+            overflow-wrap: break-word;
+         }
+
+         .dropdown-btn {
+            font-size: 14px;
+         }
+      }
+
+   </style>
 
 </head>
-
 <body>
-    <div class="banner">
-        <div class="content"> 
-           <div class="title">Ethereum Smart Contract Explorer
-             <span><a href="https://github.com/yuetloo/ethersapp" target="_blank">(github)</a></span>
-           </div>
-           <span class="networkPane">
-              <select id="networkid" class="testnet">
-                 <option value="testnet" selected="true">Testnet</option>
-                 <option value="mainnet">Mainnet</option>
-              </select>
-           </span>
-        </div>
-    </div>
+   <div id="main-page">
+      <div class="header container">
+         <div>Ethereum Contract Explorer</div>
+         <a target="_blank" href="https://github.com/yuetloo/ethersapp">
+            <svg height="20" class="github-logo" viewBox="0 0 16 16" version="1.1" width="20" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+         </a>
+         <div class="network-container">
+            <span id="network"></span>
+         </div>
+      </div>
+      <div id="contract-selection" class="container">
+         <div class="row">
+            <div class="font-large">Contract:</div>
+            <div class="button font-large" id="btn-add">&#x271A;</div>
+            <div class="button font-large" id="btn-edit">&#x270E;</div>
+            <div class="button font-large" id="btn-del">&#x2716;</div>
+         </div>
+         <div class="dropdown white-box">
+            <div class="row">
+               <div id="contract"></div>
+               <div class="dropdown-btn">V</div>
+            </div>
+            <div id="contract-list" class="dropdown-content"></div>
+         </div>
+         <div id="contract-source">
+            <a href="#" target="_blank">Contract Source Code</a>
+         </div>
+      </div>
+      <div id="contract-details" class="container">
+         <div id="menu">
+            <div><input id="filterer" placeholder="Search function"></input></div>
+            <div class="caption">Functions: </div>
+            <div id="function-list"></div>
+         </div>
+         <div id="function-content">
+            <div id="function-name"></div>
+            <div class="card">
+               <div id="input-section"></div>
+               <div id="run-button" class="button btn-std submit">Run</div>
+            </div>
+            <div class="spinner"></div>
+            <div id="result-section" class="output"></div>
+         </div>
+      </div>
+   </div>
 
-    <div class="content">
-        <div class="SearchPane">
-            <h2 class="pull-left">Contract:</h2>
-            <div class='contractGroup'>
-            <select id="contractDropdown" 
-                class="cssContractAddress" >
-            </select>
-            <div class='btnGroup'>
-              <a class='btn hidden' id='btnAddAbi'>Add</a>
-              <a class='btn hidden' id='btnDelAbi'>Delete</a>
-            </div>
-            </div>
+   <div id="modal">
+      <div class="modal-content">
+          <div class="caption del">Remove this contract from the drop down list?</div>
+          <div class="input-row">
+             <div>Contract Address:</div>  
+             <input id="contract-address" data="address" required></input>
+             <div class="error">*</div>
+          </div>
+          <div class="input-row">
+             <div>Contract Name:</div>  
+             <input id="contract-name" data="string" required></input>
+             <div class="error">*</div>
+          </div>
+          <div class="input-row">
+             <div>Contract Abi:</div>  
+             <textarea id="contract-abi" data="abi" required></textarea>
+             <div class="error">*</div>
+          </div>
+          <div class="row">
+             <div class="button btn-std submit" id="btn-save"></div>
+             <div class="button btn-std" id="btn-cancel">Cancel</div>
+          </div>
+          <div class="error"/>
+      </div>
+   </div>
+   <script type="text/javascript" src="js/ethers-app-v0.4.min.js"></script>
+   <script type="text/javascript" src="js/abi.js"></script>
+   <script type="text/javascript">
+      var abiList = defaultAbis;
+      ethers.onready = startApp;
+     
+      function refreshPage() {
+         loadContracts();
+      }
+
+      function getNetwork() {
+         var networkElement = document.getElementById('network');
+         return networkElement.getAttribute("data"); 
+      }
+
+      function loadContracts() {
+         var network = getNetwork();    
+         var contractList= document.getElementById("contract-list"); 
+         contractList.innerHTML = '';
+         var contract = document.getElementById("contract"); 
+         contract.textContent = "";
+         contract.setAttribute("data", "");
+       
+         var filteredAbi = [];
+         var allAbi = localStorage.getItem("ethersapp_abi");
+         if( allAbi == null ) { 
+            filteredAbi = defaultAbis[network];
+         } else {
+            abiList = JSON.parse(allAbi);
+            filteredAbi = abiList[network];
+         }
+ 
+         for(var i = 0; i < filteredAbi.length; i++){
+            var abi = filteredAbi[i];
+            var item = createContractDropDownElement(abi);
+            contractList.appendChild(item);
+            item.onclick = onContractChange;
+            if( i == 0 )  item.click();
+         }
+
+         if( filteredAbi.length > 0 ) {
+            document.getElementById("btn-edit").style.display = "";
+            document.getElementById("btn-del").style.display = "";
+         } else {
+            document.getElementById("btn-edit").style.display = "none";
+            document.getElementById("btn-del").style.display = "none";
+            var emptyElement = document.createElement("div");
+            emptyElement.onclick = onContractChange;
+            emptyElement.click();
+         }
+      }
+
+      function onContractChange() {
+         var actives = document.querySelectorAll("#contract-list .active"); 
+         actives.forEach( a => a.classList.remove("active"));
+         this.classList.add("active");
+        
+         var contract = document.getElementById("contract"); 
+         contract.textContent = this.textContent;
+        
+         var data = this.getAttribute("data");
+         if( data ) 
+           contract.setAttribute("data", data);
+         else 
+           contract.removeAttribute("data");
+
+         updateContractSourceLink();
+         if( loadFunctions() > 0 ) {
+            document.getElementById("contract-details").style.display = "";
+         } else {
+            document.getElementById("contract-details").style.display = "none";
+         }
+         var contractList = document.getElementById("contract-list");
+         contractList.classList.add("hide");
+         event.stopPropagation();
+      }
+
+      function selectFirstFunction() 
+      {
+         var functionList = document.getElementById("function-list");
+         var firstFunction = functionList.firstElementChild;
+         if( firstFunction ) 
+         {
+            firstFunction.click();
+         } 
+         else 
+         {
+            document.getElementById("function-content").style.display = "none"; 
+         }
+      }
+ 
+      function createContractDropDownElement(abi) {
+         var item = document.createElement("div");
+         item.textContent = abi.name + " - " + abi.address; 
+         item.setAttribute("data",abi.address);
+         return item;
+      }
+
+      function updateContractSourceLink() {
+         var prefix = getNetworkPrefix();
+         var contract = document.getElementById("contract"); 
+         var link = document.querySelector("#contract-source a");
+         
+         var address = contract.getAttribute("data");
+         console.log("source code", address);
+         if( address ) {
+            var url = "https://" + prefix + "etherscan.io/address/" + address + "#code";
+            link.setAttribute("href", url);   
+            link.style.display = "";
+         } else {
+            link.style.display = "none";
+         }
+      }
+
+      function getNetworkPrefix() {
+         var network = getNetwork();
+         var prefix = (network === "homestead"? "": network + ".");
+         return prefix;
+      }
+
+      function getCurrentContract() {
+         var network = getNetwork();
+         var addr = document.getElementById("contract").getAttribute("data"); 
+         var contractList = abiList[network];
+         var contract = contractList.find( i=> i.address === addr );
+         return contract;
+      }
+
+      function filterFunctions() {
+         loadFunctions(this.value);
+      }
+
+      function loadFunctions(filter) {
+         var functionCount = 0;
+         var functionList = document.getElementById("function-list");
+         functionList.innerHTML = "";
+   
+         var contract = getCurrentContract();
+         if( !contract ) return functionCount;
+
+         contract.abi.filter( f => f.type === "function" )
+                     .map( f => f.name ).sort().forEach(function(name, i)
+         { 
+            var haveMatch = true;
+            if( filter ) {
+               var regex =  new RegExp(filter, 'i');
+               haveMatch = name.match(regex); 
+            }
+            if( haveMatch ) {
+               var child = document.createElement("div");
+               var content = document.createTextNode(name);
+               child.appendChild(content);
+               functionList.appendChild(child);
+               child.onclick = functionSelected;
+               if( i === 0 ) {
+                  child.classList.add("selected");
+                  child.click();
+               }
+               functionCount++;
+            }
+         });
+         return functionCount;
+      }
+
+      function functionSelected() {
+         var selected = document.querySelector("div.selected");
+         if( selected ) 
+            selected.classList.remove("selected");
+ 
+         this.classList.add("selected");
+         loadDetails();
+      }
+
+      function loadDetails() {
+         var functionName = document.getElementById("function-name");
+         var selected = getSelectedFunction();
+         if( selected ) {
+            document.getElementById("function-content").style.display = "";
+            functionName.textContent = selected.name + "():";
+
+            var section = document.getElementById("input-section");
+            section.innerHTML = "";
+            selected.inputs.forEach(function(item) {
+               var inputRow = createInputRow(item);
+               section.appendChild(inputRow);
+               var inputField = inputRow.querySelector("input");
+               registerInputEventListener(inputField);
+            });
+            if( !selected.constant ) {
+               functionName.classList.add("setter");
+               if( selected.payable !== false ) {
+                  var placeholder = "Amount in ETH to send to the contract";
+                  var item = {
+                                "name": "Value",
+                                "type": "uint256",
+                                "placeholder": placeholder,
+                                "class": "tx-value"
+                             }
+                  var inputRow = createInputRow(item);
+                  section.appendChild(inputRow);
+                  var inputField = inputRow.querySelector("input");
+                  registerInputEventListener(inputField);
+               }
+            } else {
+               functionName.classList.remove("setter");
+            }
+         }   
+         clearResult();
+      }
+
+      function registerInputEventListener(inputField) {
+         inputField.onblur = validateInputOnBlur;
+         inputField.onkeyup = handleKeyUp;
+      }
+
+      function createInputRow(item, readOnly) {
+         var row = document.createElement("div");
+         row.classList.add("input-row");
+         var label = document.createElement("div");
+         label.textContent = item.name + " (" + item.type + "):";
+         var inputElement = document.createElement("input");
+         inputElement.setAttribute("data", item.type);
+         if( item.value ) {
+            inputElement.value = item.value;
+         }
+         if( item.placeholder ) {
+            inputElement.placeholder = item.placeholder;
+         }
+         if( item.class ) {
+            inputElement.classList.add(item.class);
+         }
+         if( readOnly ) {
+            inputElement.readOnly = true;
+         } 
+   
+         var error = document.createElement("div");
+         error.classList.add("error");
+         row.appendChild(label);
+         row.appendChild(inputElement);
+         row.appendChild(error);
+         return row; 
+      }
+
+      function getSelectedFunction() {
+         var contract = getCurrentContract();
+         if( !contract ) return null;
+
+         var selected = document.querySelector("div.selected");
+         if( !selected ) return null;
+
+         return contract.abi.find( i => i.type === "function" && i.name === selected.textContent );
+      }
+
+      function startApp() {
+         var networkElement = document.getElementById('network');
+         ethers.getNetwork().then(function(network){
+            networkElement.textContent = network;
+            networkElement.setAttribute("data", network);
+            registerEventListeners();
+            refreshPage();
+         });
+      }
+
+      function registerEventListeners() {
+         document.getElementById('btn-add').onclick = openModal;
+         document.getElementById('btn-del').onclick = openModal;
+         document.getElementById('btn-edit').onclick = openModal;
+         document.getElementById('btn-save').onclick = updateAbi;
+         document.getElementById('btn-cancel').onclick = closeModal;
+  
+         document.getElementById("contract").onchange = loadFunctions;
+         document.getElementById("run-button").onclick = callContractFunction;
+         document.getElementById("filterer").onkeyup = filterFunctions;
+
+         document.querySelector(".dropdown").onclick = dropdownClicked;
+         var contractAddress = document.getElementById("contract-address");
+         registerInputEventListener( contractAddress );
+         var contractName = document.getElementById("contract-name");
+         registerInputEventListener( contractName);
+         var contractAbi = document.getElementById("contract-abi");
+         registerInputEventListener( contractAbi );
+
+         window.onclick = handleClick; 
+      }
+
+       function dropdownClicked() {
+          var dropdownContent = document.getElementById("contract-list");
+          dropdownContent.classList.toggle("hide");
+          event.stopPropagation();
+       }
+
+       function handleClick() {
+          if( !event.target.matches('.dropdown-content')) {
+             document.getElementById("contract-list").classList.add("hide");
+          }
+       }
+
+       function openModal() {
+          document.getElementById('main-page').classList.add("fade-out");
+          var modal = document.getElementById('modal');
+          modal.removeAttribute("class");
+          modal.classList.add("fade-in");
+          switch( event.target.id ) {
+            case "btn-del":
+               modal.classList.add("del");
+               populateModal("Delete");
+               break; 
+            case "btn-add":
+               modal.classList.add("add");
+               populateModal("Add");
+               break; 
+            default:
+               console.log('openModal', "edit");
+               modal.classList.add("edit");
+               populateModal("Update");
+               break; 
+            }
+       }
+
+       function populateModal(action) {
+          var btn = document.getElementById('btn-save');
+          btn.textContent = action;
+
+          var address = document.getElementById("contract-address"); 
+          var name = document.getElementById("contract-name");
+          var abi = document.getElementById("contract-abi");
+          address.value = "";
+          name.value = "";
+          abi.value = "";
+
+          // hide error message as there should be no error 
+          // when the dialog first pops up
+          address.nextElementSibling.style.opacity = 0;
+          name.nextElementSibling.style.opacity = 0;
+          abi.nextElementSibling.style.opacity = 0;
+
+          var dropdown = document.getElementById("contract"); 
+          switch(action) {
+             case "Add": 
+                address.removeAttribute("readonly");
+                name.removeAttribute("readonly");
+                abi.removeAttribute("readonly");
+                break; 
+
+             default:
+                var network = getNetwork();
+                var contractAddr  = dropdown.getAttribute("data");
+                var contract = abiList[network].filter(
+                            e => e.address === contractAddr);
+                if( contract.length > 0 ) {
+                   address.value = contract[0].address;
+                   name.value = contract[0].name;
+                   abi.value = JSON.stringify(contract[0].abi);
+                }
+
+                address.readOnly = true;
+                if( action === "Delete" ) {
+                   name.readOnly = true;
+                   abi.readOnly = true;
+                } else {
+                   name.removeAttribute("readonly");
+                   abi.removeAttribute("readonly");
+                }
+                break; 
+          }
+       }
+
+       function updateAbi() {
+          var result;
+          var action = this.textContent;
+          switch( action ) {
+             case "Add":
+                result = addContract();
+                break;
+             case "Update":
+                result = updateContract();
+                break;
+             case "Delete":
+                result = deleteContract();
+                break;
+          }
+
+          // do not close the modal if there's error
+          // saving the changes
+          if( result ) closeModal();
+       }
+
+       function updateContract() {
+          var section = document.getElementById("modal"); 
+          var pass = passValidation(section);
+          if( !pass ) return pass;
+
+          console.log("passValidation", pass);
+          var network = getNetwork();
+          var address = document.getElementById("contract-address"); 
+          var name = document.getElementById("contract-name");
+          var abi = document.getElementById("contract-abi");
+          for( var i = 0; i < abiList[network].length; i++ ) {
+             if( abiList[network][i].address === address.value ) {
+                abiList[network][i].name = name.value;
+                abiList[network][i].abi = JSON.parse(abi.value);
+                break; 
+             }
+          }
+          localStorage.setItem("ethersapp_abi", JSON.stringify(abiList));
+          var selected = document.querySelector("#contract-list .active"); 
+          selected.textContent = name.value + " - " + address.value;
+          selected.click();
+          return true;
+       }
+
+       function deleteContract() {
+          var network = getNetwork();
+          var address = document.getElementById("contract-address").value; 
+          var newList = abiList[network].filter( e => e.address != address);
+          abiList[network] = newList;
+          localStorage.setItem("ethersapp_abi", JSON.stringify(abiList));
+          refreshPage();
+          
+          return true;
+       }
+
+       function addContract() {
+          var section = document.getElementById("modal"); 
+          var pass = passValidation(section);
+          if( !pass ) return;
+
+          var network = getNetwork();
+          var address = document.getElementById("contract-address"); 
+          var name = document.getElementById("contract-name");
+          var abi = document.getElementById("contract-abi");
+          var newContract = {
+             "address"     : address.value,
+             "name"        : name.value,
+             "abi"         : JSON.parse(abi.value)
+          };
+          abiList[network].push(newContract);
+          localStorage.setItem("ethersapp_abi", JSON.stringify(abiList));
+          var item = createContractDropDownElement(newContract);
+          var dropdown = document.querySelector("#contract-list");
+          dropdown.appendChild(item);
+          item.onclick = onContractChange;
+          item.click();
+          document.getElementById("btn-edit").style.display = "";
+          document.getElementById("btn-del").style.display = "";
+          return true;
+       }
+
+       function closeModal() {
+          document.getElementById('modal').classList.remove("fade-in");
+          document.getElementById('main-page').classList.remove("fade-out");
+       }
+      
+       function callContractFunction() {
+         clearResult();
+         ethers.getAccount().then(function(result){
+            var selected = getSelectedFunction();
+            if( (selected.constant == false) && (result == null) ) {
+               logContractError("This function requires an account to run");
+               return;
+            }
+ 
+            var section = document.getElementById("input-section");
+            var pass = passValidation(section);
+            if( !pass ) return;
+            showSpinner();
+   
+            var current = getCurrentContract();
+            
+            var contract = ethers.getContract(current.address, current.abi );
+            var args = getArgumentValues();
+            console.log('calling function with', args);
+            var contractFunction = contract.functions[selected.name];
+            var promise = contractFunction.apply(contract, args);
+            promise.then(function(result) {
+               updateResult(selected, result);
+            }, function(reject){
+               console.log("reject", reject);
+               logContractError(reject);
+            });
+         });
+
+       }
+
+       function showSpinner() {
+          var spinner = document.querySelector(".spinner");
+          spinner.classList.add("show");
+       }
+
+       function hideSpinner() {
+          var spinner = document.querySelector(".spinner");
+          spinner.classList.remove("show");
+       }
+
+       function clearResult() {
+           var section = document.getElementById("result-section");
+           section.innerHTML = "";
+           section.classList.remove("card");
+       }
+
+       function logContractError(error) {
+           var section = document.getElementById("result-section");
+           hideSpinner();
+           var errorElement = document.createElement("div");
+           errorElement.textContent = error;
+           errorElement.style.color = "red";
+           section.appendChild(errorElement);
+       }
+
+       function updateResult(contractFunction, result) {
+           var section = document.getElementById("result-section");
+           hideSpinner();
+           section.classList.add("card");
+           var readOnly = true;
            
-            <div id="progressBar"></div>
-       </div>
+           if( contractFunction.constant === true ) {
+             if( contractFunction.outputs.length === 1 ) {
+                result = [result];
+             }
+             contractFunction.outputs.forEach(function(item, i){
+                item.value = result[i]; 
+                var inputRow = createInputRow(item, readOnly);
+                section.appendChild(inputRow);
+             });
+           } else {
+              var item = {"name":"txhash","type":"bytes","value":result.hash};
+              var inputRow = createInputRow(item, readOnly);
+              section.appendChild(inputRow);
+              var anchor = createTxHashLink(result.hash); 
+              section.appendChild(anchor);
+           }
+       }
 
-       <div id='modalAddAbi' class='modalDialog'>
-       <div id='formAddAbi'>
-          <div class='input-group'>
-            <div>Contract Address:
-              <span id='alertAddress' class='error'></span>
-            </div>
-            <input id='newContractAddress'></input>
-          </div>
-          <div class='input-group'>
-            <div>Contract Name:
-              <span id='alertName' class='error'></span>
-            </div>
-            <input id='newContractName'></input>
-          </div>
-          <div class='input-group'>
-            <div>Abi:
-              <span id='alertAbi' class='error'></span>
-            </div>
-            <textarea id='newContractAbi' class='input-abi'></textarea>
-          </div> 
-          <div class="cssSmallSpacer"></div>
-          <div class="display-inline col-40-pct pull-left">
-            <div id='btnSaveAbi' class="btn">Save</div>
-            <div id='btnCancelAddAbi' class="btn">Cancel</div>
-          </div>
-          <div class="display-inline col-60-pct pull-right">
-            <div id='addAbiAlert' class="alert wrap display-inline"></div>
-          </div>
-          <div class='clear-both'></div>
-       </div>
-       </div>
+       function createTxHashLink(hash){
+           var prefix = getNetworkPrefix();
+           var href = "https://" + prefix + "etherscan.io/tx/" + hash;
+           var anchor = document.createElement("a");
+           anchor.href = href;
+           anchor.target = "_blank";
+           anchor.textContent = href;
+           return anchor; 
+       }
 
-       <div class="searchResult">
-       <div class="container">
-          <div id="contractPane">
-             <h2>Contract: <span id="contractName"></span>
-                           <span id="contractSource"></span>
-             </h2>
-          </div>
-          <h2 class="contract error hidden">Contract Not Found!</h2>
-       </div>
-       <div class="container">
-          <div id="nav">
-              <div>
-                  <input id="filter" placeholder="Search function"/>
-              </div>
-              <div id="functions"></div>
-          </div>
-          <div id="functionDetail">
-              <h2>Function: <span id="functionName"></span>
-              <a href="#" class="tooltip">
-                C 
-                <span><small>
-                  Constant function - gas is not required to call the function
-                </small></span>
-              </a>
-              </h2>
-              <div id="content"/>
-          </div>
-          <div id="openModal" class="modalDialog">
-             <div>
-                <div class="cssSmallSpacer"></div>
-                <input type="password" id="password" class="full-width" 
-                       placeholder="Password to decrypt wallet"></input>
-                <div class="cssTinySpacer"></div>
-                <input class="inputFile" type="file" id="importFile" class="full-width"/>
-                <div class="cssSmallSpacer"></div>
-                <div class="section">
-                  <div class="display-inline col-40-pct pull-left">
-                    <a id="closeModal" class="btn">Cancel</a>
-                    <a id="importWallet" class="btn">Import Wallet</a>
-                  </div>
-                  <div class="display-inline col-60-pct pull-right">
-                    <div class="alert wrap display-inline"></div>
-                  </div>
-                  <div class="clear-both"></div>
-                </div>
-             </div>
-          </div>
-          <div id="progressModal" class="modalDialog">
-             <div class="progress">
-                 <h2>Importing wallet...</h2>
-                 <div class="bar"><div class="fill"></div></div>
-                 <span class='pctText'>0</span>%
-                 <div class='cssSmallSpacer'></div>
-             </div>
-          </div>
-       </div>
-    </div>
+       function getArgumentValues() {
+          var args = [];
+          var selector = "#input-section input";
+          var inputs = document.querySelectorAll(selector);
+          inputs.forEach( i => {
+              args.push(( i.classList.contains("tx-value")? { "value": ethers.parseEther(i.value) } : i.value ));
+          });
+          return args;
+       }
 
-   <script src="js/jquery-2.2.3.min.js"></script>
-   <script src="js/buffer.js"></script>
-   <script src="js/web3.min.js"></script>
-   <script src="js/web3-coder.js"></script>
-   <script src="js/httpclient.js"></script>
-   <script src="js/wallet.js"></script>
-   <script src="js/ethereumjs-tx.js"></script>
-   <script src="js/abi.js"></script>
-   <script src="js/aes.js"></script>
-   <script src="js/scryptsy.js"></script>
-   <script src="js/ethers-v2.0.min.js" type="text/javascript"></script>
-   <script src="js/app.js"></script>
+       function passValidation(section) {
+          var inputFields = section.querySelectorAll("input");
+          var pass = true; 
+          inputFields.forEach(function(field){
+             if( !validateInput(field) ) {
+                console.log("passValidation", false);
+                pass = false;   
+             }
+          }); 
+
+          var textareas = section.querySelectorAll("textarea");
+          textareas.forEach( function(field) {
+             if( !validateInput(field) ) {
+                pass = false;   
+             }
+          });
+          return pass;
+       }
+
+       function isValidAbi(val) {
+          var result = { valid: true };
+          try {
+             var abi = JSON.parse(val);
+             var contract = ethers.getContract("0x" + "0".repeat(46), abi);
+          } catch (e) {
+             result.valid = false;
+             result.message = "Invalid ABI";
+          }
+         
+          return result;
+       }
+
+       function isValidHex(val, type, len) {
+          var result = {};
+          result.valid = true;
+          
+          if( val.length === 0 ) 
+          {
+             result.valid = false;
+             result.message = "Field value is required";
+          }
+          else 
+          {
+             var pattern = "^0x[0-9a-fA-F]" + (len? "{"+ len + "}" : "+")+"$";
+             var regex = new RegExp(pattern);
+             result.valid = regex.test(val);
+             console.log('regex', pattern, result.valid);
+             result.message = "Invalid hex string";
+          }
+          return result;
+       }
+
+       function isValidUint(val, type) {
+          var result = {};
+          result.valid = true;
+
+          try {
+             var bigNum = ethers.utils.bigNumberify(val);
+             if( bigNum.lt(0) ) 
+             {
+                result.valid = false;
+                result.message = "Invalid " + type;
+             }
+          } catch ( e ) {
+             result.valid = false;
+             result.message = "Invalid " + type + ": " + e;
+          }
+          return result;
+       }
+
+       function isValid(val, type) {
+          var result = {};
+          result.valid = true;
+          result.message = "";
+          
+          var trimmedValue = val.trim();
+          if( type.indexOf("bytes") >= 0 ) {
+             result = isValidHex(trimmedValue, type);
+          } else if( type === "address" ) {
+             result = isValidHex(trimmedValue, type, 40);
+             if( result.valid === false ) {
+                result.message = "Invalid address";
+             }
+          } else if( type === "abi" ) {
+             result = isValidAbi(trimmedValue);
+          } else if( type.indexOf("uint") >= 0 ) {
+             result = isValidUint(val, type);
+          }
+
+          return result;
+       }
+
+       function handleKeyUp() {
+          if( event.keyCode == 13 ) {
+             var submitButton = this.closest(".submit");
+             submitButton.click();
+          }
+       }
+
+       function validateInputOnBlur() {
+          validateInput(this);
+       }
+
+       function validateInput(inputField) {
+          var border = "";
+          var display = "none";
+          var errorMessage = inputField.nextElementSibling;
+          errorMessage.style.opacity = 0;
+           
+          var isRequired = inputField.hasAttribute("required");
+          var inputValue = inputField.value;
+          if( isRequired && inputValue === "" ) 
+          {
+             errorMessage.style.opacity = 1;
+             errorMessage.textContent = "* Value is required";
+             return false;
+          }
+             
+          var inputType = inputField.getAttribute("data");
+          var result = isValid(inputValue, inputType);
+          if( !result.valid ){
+             errorMessage.style.opacity = 1;
+             errorMessage.textContent = "* " + result.message;
+          } 
+          return( result.valid );
+       }
+
+   </script>
 </body>
 </html>
