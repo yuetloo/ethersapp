@@ -8,7 +8,7 @@ To access ropsten (testnet) , use the following URL:
 [https://ropsten.ethers.io/#!/app-link/yuetloo.github.io/ethersapp/](https://ropsten.ethers.io/#!/app-link/yuetloo.github.io/ethersapp/)
 
 # Purpose
-ethersapp was created to help me learn about ethereum contracts.  I was inspired to create this tool after attending a few ethereum contract introduction meetup sessions by [Ledger Labs] (https://ledgerlabs.io).
+ethersapp was created to help me learn about ethereum contracts.  
 
 # Security
 Please note that ethersapp has not been through a comprehensive security review. It is an experimental software intended for small amount of Ether to be used to experiment with Ethereum smart contracts. 
