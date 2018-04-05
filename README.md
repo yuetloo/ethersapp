@@ -16,7 +16,7 @@ Please note that ethersapp has not been through a comprehensive security review.
 # Usage
 1. Select the contract from the drop down list
 
-   The dropdown list is initialized with the list in abi.js. There ABI loaded from abi.js cannot be deleted. Lists of verified contracts and their ABI can be obtained from blockchain explorers like [https://etherscan.io/contractsVerified/](https://etherscan.io/contractsVerified/) and [https://etherchain.org/contracts](https://etherchain.org/contracts).
+   The dropdown list is initialized with the list in abi.js. User can add/edit/delete the contracts in the dropdown list.  The modified list is saved in the user's local storage.
 
 2. Select a function to work with from the left hand side panel 
 
