@@ -416,7 +416,7 @@
           <div class="error"/>
       </div>
    </div>
-   <script type="text/javascript" src="js/ethers-app-v0.4.min.js"></script>
+   <script type="text/javascript" src="js/ethers-app-v0.5.min.js"></script>
    <script type="text/javascript" src="js/abi.js"></script>
    <script type="text/javascript">
       var abiList = defaultAbis;
@@ -442,7 +442,7 @@
          var filteredAbi = [];
          var allAbi = localStorage.getItem("ethersapp_abi");
          if( allAbi == null ) { 
-            filteredAbi = defaultAbis[network];
+            filteredAbi = defaultAbis[network] || [];
          } else {
             abiList = JSON.parse(allAbi);
             filteredAbi = abiList[network];
@@ -501,13 +501,17 @@
       }
 
       function updateContractSourceLink() {
-         var prefix = getNetworkPrefix();
-         var contract = document.getElementById("contract"); 
          var link = document.querySelector("#contract-source a");
-         
+         if( getNetwork() === "test" ) { 
+            link.style.display = "none";
+            return;
+         }
+ 
+         var contract = document.getElementById("contract"); 
          var address = contract.getAttribute("data");
          console.log("source code", address);
          if( address ) {
+            var prefix = getNetworkPrefix();
             var url = "https://" + prefix + "etherscan.io/address/" + address + "#code";
             link.setAttribute("href", url);   
             link.style.display = "";
@@ -526,7 +530,10 @@
          var network = getNetwork();
          var addr = document.getElementById("contract").getAttribute("data"); 
          var contractList = abiList[network];
-         var contract = contractList.find( i=> i.address === addr );
+         var contract = null;
+         if( contractList ) { 
+            contract = contractList.find( i=> i.address === addr );
+         }
          return contract;
       }
 
