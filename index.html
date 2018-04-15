@@ -341,6 +341,11 @@
          }
       }
 
+      #no-contract {
+         color: orange;
+         text-align: center;
+      }   
+
    </style>
 
 </head>
@@ -372,6 +377,9 @@
          <div id="contract-source">
             <a href="#" target="_blank">Contract Source Code</a>
          </div>
+      </div>
+      <div id="no-contract" class="container">
+          No contract! To continue, click the <span style="color: #19B5FE;">&#x271A;</span> sign to add a contract.
       </div>
       <div id="contract-details" class="container">
          <div id="menu">
@@ -460,9 +468,13 @@
          if( filteredAbi.length > 0 ) {
             document.getElementById("btn-edit").style.display = "";
             document.getElementById("btn-del").style.display = "";
+            document.getElementById("no-contract").style.display = "none";
          } else {
             document.getElementById("btn-edit").style.display = "none";
             document.getElementById("btn-del").style.display = "none";
+            document.getElementById("no-contract").style.display = "block";
+
+            // create a dummy element to trigger painting the detail section
             var emptyElement = document.createElement("div");
             emptyElement.onclick = onContractChange;
             emptyElement.click();
@@ -858,6 +870,7 @@
           item.click();
           document.getElementById("btn-edit").style.display = "";
           document.getElementById("btn-del").style.display = "";
+          document.getElementById("no-contract").style.display = "none";
           return true;
        }
 
