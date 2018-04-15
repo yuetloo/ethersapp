@@ -439,15 +439,16 @@
          contract.textContent = "";
          contract.setAttribute("data", "");
        
-         var filteredAbi = [];
+         var filteredAbi;
          var allAbi = localStorage.getItem("ethersapp_abi");
          if( allAbi == null ) { 
-            filteredAbi = defaultAbis[network] || [];
+            filteredAbi = defaultAbis[network];
          } else {
             abiList = JSON.parse(allAbi);
             filteredAbi = abiList[network];
          }
  
+         filteredAbi = filteredAbi || [];
          for(var i = 0; i < filteredAbi.length; i++){
             var abi = filteredAbi[i];
             var item = createContractDropDownElement(abi);
@@ -502,7 +503,7 @@
 
       function updateContractSourceLink() {
          var link = document.querySelector("#contract-source a");
-         if( getNetwork() === "test" ) { 
+         if( !isSupportedByEtherscan() ) {
             link.style.display = "none";
             return;
          }
@@ -845,6 +846,9 @@
              "name"        : name.value,
              "abi"         : JSON.parse(abi.value)
           };
+          if( !abiList[network] ) {
+             abiList[network] = [];
+          }
           abiList[network].push(newContract);
           localStorage.setItem("ethersapp_abi", JSON.stringify(abiList));
           var item = createContractDropDownElement(newContract);
@@ -937,9 +941,15 @@
               var item = {"name":"txhash","type":"bytes","value":result.hash};
               var inputRow = createInputRow(item, readOnly);
               section.appendChild(inputRow);
-              var anchor = createTxHashLink(result.hash); 
-              section.appendChild(anchor);
+              if( isSupportedByEtherscan() ) {
+                 var anchor = createTxHashLink(result.hash); 
+                 section.appendChild(anchor);
+              }
            }
+       }
+
+       function isSupportedByEtherscan() {
+          return( ["ropsten", "homestead"].includes(getNetwork()) );
        }
 
        function createTxHashLink(hash){
