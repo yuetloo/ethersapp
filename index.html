@@ -644,7 +644,7 @@
          label.textContent = item.name + " (" + item.type + "):";
          var inputElement = document.createElement("input");
          inputElement.setAttribute("data", item.type);
-         if( item.value ) {
+         if( item.value != undefined ) {
             inputElement.value = item.value;
          }
          if( item.placeholder ) {
@@ -881,9 +881,9 @@
       
        function callContractFunction() {
          clearResult();
-         ethers.getAccount().then(function(result){
+         ethers.getAccount().then(function(account){
             var selected = getSelectedFunction();
-            if( (selected.constant == false) && (result == null) ) {
+            if( (selected.constant == false) && (account == null) ) {
                logContractError("This function requires an account to run");
                return;
             }
@@ -942,11 +942,9 @@
            var readOnly = true;
            
            if( contractFunction.constant === true ) {
-             if( contractFunction.outputs.length === 1 ) {
-                result = [result];
-             }
              contractFunction.outputs.forEach(function(item, i){
-                item.value = result[i]; 
+                item.value = ( contractFunction.outputs.length === 1? 
+                                result: result[i]); 
                 var inputRow = createInputRow(item, readOnly);
                 section.appendChild(inputRow);
              });
