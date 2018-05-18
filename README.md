@@ -4,8 +4,11 @@ ethersapp is an open source, javascript, client-side tool for exploring the Ethe
 To access mainnet, use the following URL: 
 [https://ethers.io/#!/app-link/yuetloo.github.io/ethersapp/](https://ethers.io/#!/app-link/yuetloo.github.io/ethersapp/)
 
-To access ropsten (testnet) , use the following URL: 
+To access ropsten (testnet), use the following URL: 
 [https://ropsten.ethers.io/#!/app-link/yuetloo.github.io/ethersapp/](https://ropsten.ethers.io/#!/app-link/yuetloo.github.io/ethersapp/)
+
+To access ganache running on port 7545, use the following URL: 
+[http://custom-rpc.ethers.io/?port=7545#!/app-link/yuetloo.github.io/ethersapp/](http://custom-rpc.ethers.io/?port=7545#!/app-link/yuetloo.github.io/ethersapp/)
 
 # Purpose
 ethersapp was created to help me learn about ethereum contracts.  
