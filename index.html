@@ -116,6 +116,10 @@
          padding: 10px;
       }
 
+      #metamask {
+         background-color: orangered;
+      }
+
       #contract {
          font-size: 18px;
          padding: 10px;
@@ -208,7 +212,6 @@
          box-sizing: border-box;
          background: #fff;
          min-height: 90vh;
-         xborder-left: 1px solid #ccc;
          margin: auto;
       }
 
@@ -263,6 +266,44 @@
          width: 100%;
          box-sizing: border-box;
       }
+
+      .wallet-modal {
+         display: none;
+         position: fixed; /* Stay in place */
+         z-index: 1; /* Sit on top */
+         left: 0;
+         top: 0;
+         width: 100%; /* Full width */
+         height: 100%; /* Full height */
+         overflow: auto; /* Enable scroll if needed */
+         background-color: rgb(0,0,0); /* Fallback color */
+         background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content/Box */
+      .wallet-modal-content {
+         background-color: #fefefe;
+         margin: 15% auto; /* 15% from the top and centered */
+         padding: 20px;
+         border: 1px solid #888;
+         width: 70%; /* Could be more or less, depending on screen size */
+      }
+
+      /* The Close Button */
+      .close {
+         color: #aaa;
+         float: right;
+         font-size: 28px;
+         font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+         color: black;
+         text-decoration: none;
+         cursor: pointer;
+      }
+
 
       #modal {
          position: absolute;
@@ -344,20 +385,36 @@
       #no-contract {
          color: orange;
          text-align: center;
-      }   
+      }
+
+      .network-container button {
+         width: 200px;
+      }
+
+      .network-container > div {
+         margin-bottom: 5px;
+      }
 
    </style>
 
 </head>
 <body>
+
    <div id="main-page">
       <div class="header container">
-         <div>Ethereum Contract Explorer</div>
+         <div>Contract Explorer</div>
          <a target="_blank" href="https://github.com/yuetloo/ethersapp">
             <svg height="20" class="github-logo" viewBox="0 0 16 16" version="1.1" width="20" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
          </a>
          <div class="network-container">
-            <span id="network"></span>
+               <button id="connect"></button>
+               <label for="network">@</label>
+               <select name="network" id="network">
+                  <option value="homestead">Homestead</option>
+                  <option value="ropsten">Ropsten</option>
+                  <option value="goerli">Goerli</option>
+                  <option value="rinkeby">Rinkeby</option>
+               </select>
          </div>
       </div>
       <div id="contract-selection" class="container">
@@ -399,6 +456,14 @@
       </div>
    </div>
 
+   <div id="wallet" class="wallet-modal">
+      <div class="wallet-modal-content">
+         <span id="wallet-close" class="close">&times;</span>
+         <p>Connect to a Wallet</p>
+         <div id="metamask" class="button btn-std">metamask</div>
+      </div>
+   </div>
+
    <div id="modal">
       <div class="modal-content">
           <div class="caption del">Remove this contract from the drop down list?</div>
@@ -424,19 +489,26 @@
           <div class="error"/>
       </div>
    </div>
-   <script type="text/javascript" src="js/ethers-app-v0.5.min.js"></script>
+
+
+
+   <script type="text/javascript" src="js/ethers.umd.min.js"></script>
    <script type="text/javascript" src="js/abi.js"></script>
    <script type="text/javascript">
       var abiList = defaultAbis;
-      ethers.onready = startApp;
+      let signer = null;
+      window.addEventListener('load', startApp);
      
       function refreshPage() {
+         signer = null; // reset the signer on network change
+         document.getElementById("connect").textContent = "Connect";
          loadContracts();
       }
 
       function getNetwork() {
          var networkElement = document.getElementById('network');
-         return networkElement.getAttribute("data"); 
+         console.log('network', networkElement.value)
+         return networkElement.value;
       }
 
       function loadContracts() {
@@ -676,13 +748,8 @@
       }
 
       function startApp() {
-         var networkElement = document.getElementById('network');
-         ethers.getNetwork().then(function(network){
-            networkElement.textContent = network;
-            networkElement.setAttribute("data", network);
-            registerEventListeners();
-            refreshPage();
-         });
+         registerEventListeners();
+         refreshPage();      
       }
 
       function registerEventListeners() {
@@ -691,10 +758,15 @@
          document.getElementById('btn-edit').onclick = openModal;
          document.getElementById('btn-save').onclick = updateAbi;
          document.getElementById('btn-cancel').onclick = closeModal;
+         document.getElementById('wallet-close').onclick = closeWallet;
+         document.getElementById('connect').onclick = connectWallet;
+         document.getElementById('metamask').onclick = connectMetamask;
   
          document.getElementById("contract").onchange = loadFunctions;
          document.getElementById("run-button").onclick = callContractFunction;
          document.getElementById("filterer").onkeyup = filterFunctions;
+
+         document.getElementById('network').onchange = refreshPage;
 
          document.querySelector(".dropdown").onclick = dropdownClicked;
          var contractAddress = document.getElementById("contract-address");
@@ -707,16 +779,58 @@
          window.onclick = handleClick; 
       }
 
+      function closeWallet() {
+         document.getElementById('wallet').style.display = "none";
+      }
+
+      function shortenAddress(address) {
+         return address.substring(0,12) + "..." + address.substring(address.length-6)
+      }
+
+      function connectMetamask(event) {
+         event.stopPropagation();
+
+         if (typeof window.ethereum === 'undefined') {
+            alert('MetaMask is not installed!');
+            return;
+         }
+
+         document.getElementById("wallet-close").click();
+
+         ethereum.request({ method: 'eth_requestAccounts' }).then(async accounts => {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            provider.ready.then(() => {
+               console.log('network', provider.network);
+               if( provider.network.name !== getNetwork()) {
+                  alert("Selected network mismatch with metamask. Please select the same network");
+                  return;
+               }
+
+               document.getElementById("connect").textContent = shortenAddress(accounts[0]);
+               signer = provider.getSigner();
+
+               ethereum.on('accountsChanged', (accounts) => {
+                  window.location.reload();
+               });
+
+               ethereum.on('chainChanged', (chainId) => {
+                  window.location.reload();
+               });
+
+            });
+         })
+      }
+
        function dropdownClicked() {
           var dropdownContent = document.getElementById("contract-list");
           dropdownContent.classList.toggle("hide");
           event.stopPropagation();
        }
 
-       function handleClick() {
+       function handleClick(event) {
           if( !event.target.matches('.dropdown-content')) {
              document.getElementById("contract-list").classList.add("hide");
-          }
+         }
        }
 
        function openModal() {
@@ -880,35 +994,49 @@
           document.getElementById('main-page').classList.remove("fade-out");
        }
       
-       function callContractFunction() {
+       function callContractFunction(event) {
+         event.stopPropagation();
          clearResult();
-         ethers.getAccount().then(function(account){
-            var selected = getSelectedFunction();
-            if( (selected.constant == false) && (account == null) ) {
-               logContractError("This function requires an account to run");
+
+         var selected = getSelectedFunction();
+         var section = document.getElementById("input-section");
+         var pass = passValidation(section);
+         if( !pass ) return;
+
+         if( selected.constant == false ) {
+            if( !signer )
+            {
+               alert("Please click the connect button to connect to a wallet first");
                return;
             }
- 
-            var section = document.getElementById("input-section");
-            var pass = passValidation(section);
-            if( !pass ) return;
-            showSpinner();
-   
-            var current = getCurrentContract();
-            
-            var contract = ethers.getContract(current.address, current.abi );
-            var args = getArgumentValues();
-            console.log('calling function with', args);
-            var contractFunction = contract.functions[selected.name];
-            var promise = contractFunction.apply(contract, args);
-            promise.then(function(result) {
-               updateResult(selected, result);
-            }, function(reject){
-               console.log("reject", reject);
-               logContractError(reject);
-            });
-         });
+            executeContractFunction(signer);
+         } else {
+            const provider = ethers.getDefaultProvider(getNetwork());
+            executeContractFunction(provider);
+         }
+       }
 
+       function connectWallet() {
+         document.getElementById('wallet').style.display = "block";
+       }
+
+       function executeContractFunction(signerOrProvider) {
+         const selected = getSelectedFunction();
+         showSpinner();
+
+         var current = getCurrentContract();
+
+         var contract = new ethers.Contract(current.address, current.abi, signerOrProvider );
+         var args = getArgumentValues();
+         console.log('calling function with', args);
+         var contractFunction = contract.functions[selected.name];
+         var promise = contractFunction.apply(contract, args);
+         promise.then(function(result) {
+            updateResult(selected, result);
+         }, function(reject){
+            console.log("reject", reject);
+            logContractError(JSON.stringify(reject));
+         });
        }
 
        function showSpinner() {
@@ -1041,7 +1169,7 @@
           result.valid = true;
 
           try {
-             var bigNum = ethers.utils.bigNumberify(val);
+             var bigNum = ethers.BigNumber.from(val);
              if( bigNum.lt(0) ) 
              {
                 result.valid = false;
@@ -1102,6 +1230,7 @@
              return false;
           }
              
+          console.log('inputField', inputField, isRequired)
           var inputType = inputField.getAttribute("data");
           var result = isValid(inputValue, inputType);
           if( !result.valid ){
