@@ -289,6 +289,10 @@
          width: 70%; /* Could be more or less, depending on screen size */
       }
 
+      .wallet-modal-content div {
+         margin-bottom: 10px;
+      }
+
       /* The Close Button */
       .close {
          color: #aaa;
@@ -460,7 +464,8 @@
       <div class="wallet-modal-content">
          <span id="wallet-close" class="close">&times;</span>
          <p>Connect to a Wallet</p>
-         <div id="metamask" class="button btn-std">metamask</div>
+         <div id="metamask" class="button btn-std">Metamask</div>
+         <div id="wallet-connect" class="button btn-std">WalletConnect</div>
       </div>
    </div>
 
@@ -634,9 +639,11 @@
          var contract = getCurrentContract();
          if( !contract ) return functionCount;
 
-         contract.abi.filter( f => f.type === "function" )
-                     .map( f => f.name ).sort().forEach(function(name, i)
+         console.log('contract abi', contract.abi)
+         const contractInterface = new ethers.utils.Interface(contract.abi);
+         Object.keys(contractInterface.functions).sort().forEach(function(key, i)
          { 
+            const name = contractInterface.functions[key].name;
             var haveMatch = true;
             if( filter ) {
                var regex =  new RegExp(filter, 'i');
@@ -645,6 +652,7 @@
             if( haveMatch ) {
                var child = document.createElement("div");
                var content = document.createTextNode(name);
+               child.dataset.signature = key;
                child.appendChild(content);
                functionList.appendChild(child);
                child.onclick = functionSelected;
@@ -713,7 +721,7 @@
          var row = document.createElement("div");
          row.classList.add("input-row");
          var label = document.createElement("div");
-         label.textContent = item.name + " (" + item.type + "):";
+         label.textContent = (item.name? item.name: "") + " (" + item.type + "):";
          var inputElement = document.createElement("input");
          inputElement.setAttribute("data", item.type);
          if( item.value != undefined ) {
@@ -744,7 +752,9 @@
          var selected = document.querySelector("div.selected");
          if( !selected ) return null;
 
-         return contract.abi.find( i => i.type === "function" && i.name === selected.textContent );
+         const signature = selected.dataset.signature;
+         const contractInterface = new ethers.utils.Interface(contract.abi);
+         return { signature, ...contractInterface.functions[signature]};
       }
 
       function startApp() {
@@ -761,7 +771,8 @@
          document.getElementById('wallet-close').onclick = closeWallet;
          document.getElementById('connect').onclick = connectWallet;
          document.getElementById('metamask').onclick = connectMetamask;
-  
+         document.getElementById('wallet-connect').onclick = connectWalletConnect;
+
          document.getElementById("contract").onchange = loadFunctions;
          document.getElementById("run-button").onclick = callContractFunction;
          document.getElementById("filterer").onkeyup = filterFunctions;
@@ -819,6 +830,10 @@
 
             });
          })
+      }
+
+      function connectWalletConnect() {
+         event.stopPropagation();
       }
 
        function dropdownClicked() {
@@ -1026,10 +1041,11 @@
 
          var current = getCurrentContract();
 
+         console.log('contract selected', current);
          var contract = new ethers.Contract(current.address, current.abi, signerOrProvider );
          var args = getArgumentValues();
-         console.log('calling function with', args);
-         var contractFunction = contract.functions[selected.name];
+         
+         var contractFunction = contract.functions[selected.signature];
          var promise = contractFunction.apply(contract, args);
          promise.then(function(result) {
             updateResult(selected, result);
@@ -1072,9 +1088,7 @@
            
            if( contractFunction.constant === true ) {
              contractFunction.outputs.forEach(function(item, i){
-                item.value = ( contractFunction.outputs.length === 1? 
-                                result: result[i]); 
-                var inputRow = createInputRow(item, readOnly);
+                const inputRow = createInputRow({ value: result[i], ...item}, readOnly);
                 section.appendChild(inputRow);
              });
            } else {
@@ -1134,13 +1148,13 @@
        function isValidAbi(val) {
           var result = { valid: true };
           try {
-             var abi = JSON.parse(val);
-             var contract = ethers.getContract("0x" + "0".repeat(46), abi);
+             var abi = new ethers.utils.Interface(val);
           } catch (e) {
              result.valid = false;
              result.message = "Invalid ABI";
+             console.log(result.message, e)
           }
-         
+
           return result;
        }
 
