@@ -411,15 +411,9 @@
             <svg height="20" class="github-logo" viewBox="0 0 16 16" version="1.1" width="20" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
          </a>
          <div class="network-container">
-               <button id="connect"></button>
-               <label for="network">@</label>
-               <select name="network" id="network">
-                  <option value="homestead">Homestead</option>
-                  <option value="ropsten">Ropsten</option>
-                  <option value="goerli">Goerli</option>
-                  <option value="rinkeby">Rinkeby</option>
-                  <option value="kovan">Kovan</option>
-               </select>
+               <button id="connect">Connect</button>
+               <span>@</span>
+               <span id="network"></span>
          </div>
       </div>
       <div id="contract-selection" class="container">
@@ -466,7 +460,7 @@
          <span id="wallet-close" class="close">&times;</span>
          <p>Connect to a Wallet</p>
          <div id="metamask" class="button btn-std">Metamask</div>
-         <div id="wallet-connect" class="button btn-std">WalletConnect</div>
+         <div id="wallet-connect" class="button btn-std hide">WalletConnect</div>
       </div>
    </div>
 
@@ -503,22 +497,15 @@
    <script type="text/javascript">
       var abiList = defaultAbis;
       let signer = null;
+      let network = null;
       window.addEventListener('load', startApp);
      
       function refreshPage() {
-         signer = null; // reset the signer on network change
-         document.getElementById("connect").textContent = "Connect";
+         document.getElementById('network').textContent = network;
          loadContracts();
       }
 
-      function getNetwork() {
-         var networkElement = document.getElementById('network');
-         console.log('network', networkElement.value)
-         return networkElement.value;
-      }
-
       function loadContracts() {
-         var network = getNetwork();    
          var contractList= document.getElementById("contract-list"); 
          contractList.innerHTML = '';
          var contract = document.getElementById("contract"); 
@@ -601,24 +588,30 @@
          var contract = document.getElementById("contract"); 
          var address = contract.getAttribute("data");
          console.log("source code", address);
+
+         link.style.display = "none";
          if( address ) {
-            var prefix = getNetworkPrefix();
-            var url = "https://" + prefix + "etherscan.io/address/" + address + "#code";
-            link.setAttribute("href", url);   
-            link.style.display = "";
-         } else {
-            link.style.display = "none";
+            const url = getEtherscanUrl("address", address);
+            if( url )
+            {
+               link.setAttribute("href", url);
+               link.style.display = "";
+            }
          }
       }
 
-      function getNetworkPrefix() {
-         var network = getNetwork();
-         var prefix = (network === "homestead"? "": network + ".");
-         return prefix;
+      function getEtherscanUrl(type, value) {
+         if( isSupportedByEtherscan ) {
+            const prefix = (network === "homestead"? "": network + ".");
+            const postfix = (type === "address"? "#code": "");
+            const url = `https://${prefix}etherscan.io/${type}/${value}${postfix}`;
+            return url;
+         } else {
+            return "";
+         }
       }
 
       function getCurrentContract() {
-         var network = getNetwork();
          var addr = document.getElementById("contract").getAttribute("data"); 
          var contractList = abiList[network];
          var contract = null;
@@ -759,6 +752,10 @@
       }
 
       function startApp() {
+         const address = ethers.constants.AddressZero;
+         const provider = ethers.getDefaultProvider();
+         signer = new ethers.VoidSigner( address, provider )
+         network =  provider.network.name;
          registerEventListeners();
          refreshPage();      
       }
@@ -777,8 +774,6 @@
          document.getElementById("contract").onchange = loadFunctions;
          document.getElementById("run-button").onclick = callContractFunction;
          document.getElementById("filterer").onkeyup = filterFunctions;
-
-         document.getElementById('network').onchange = refreshPage;
 
          document.querySelector(".dropdown").onclick = dropdownClicked;
          var contractAddress = document.getElementById("contract-address");
@@ -813,19 +808,19 @@
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             provider.ready.then(() => {
                console.log('network', provider.network);
-               if( provider.network.name !== getNetwork()) {
-                  alert("Selected network mismatch with metamask. Please select the same network");
-                  return;
-               }
+               network = provider.network.name;
 
                document.getElementById("connect").textContent = shortenAddress(accounts[0]);
                signer = provider.getSigner();
+               refreshPage();
 
                ethereum.on('accountsChanged', (accounts) => {
+                  console.log('account chaange')
                   window.location.reload();
                });
 
                ethereum.on('chainChanged', (chainId) => {
+                  //console.log('chain chaange')
                   window.location.reload();
                });
 
@@ -897,7 +892,6 @@
                 break; 
 
              default:
-                var network = getNetwork();
                 var contractAddr  = dropdown.getAttribute("data");
                 var contract = abiList[network].filter(
                             e => e.address === contractAddr);
@@ -945,7 +939,6 @@
           if( !pass ) return pass;
 
           console.log("passValidation", pass);
-          var network = getNetwork();
           var address = document.getElementById("contract-address"); 
           var name = document.getElementById("contract-name");
           var abi = document.getElementById("contract-abi");
@@ -964,7 +957,6 @@
        }
 
        function deleteContract() {
-          var network = getNetwork();
           var address = document.getElementById("contract-address").value; 
           var newList = abiList[network].filter( e => e.address != address);
           abiList[network] = newList;
@@ -979,7 +971,6 @@
           var pass = passValidation(section);
           if( !pass ) return;
 
-          var network = getNetwork();
           var address = document.getElementById("contract-address"); 
           var name = document.getElementById("contract-name");
           var abi = document.getElementById("contract-abi");
@@ -1015,21 +1006,17 @@
          clearResult();
 
          var selected = getSelectedFunction();
+         if( selected.constant == false && signer.address === ethers.constants.AddressZero ) {
+            alert("Please click the connect button to connect to a wallet first");
+            return;
+         }
+
          var section = document.getElementById("input-section");
          var pass = passValidation(section);
          if( !pass ) return;
 
-         if( selected.constant == false ) {
-            if( !signer )
-            {
-               alert("Please click the connect button to connect to a wallet first");
-               return;
-            }
-            executeContractFunction(signer);
-         } else {
-            const provider = ethers.getDefaultProvider(getNetwork());
-            executeContractFunction(provider);
-         }
+         executeContractFunction(signer);
+
        }
 
        function connectWallet() {
@@ -1096,25 +1083,29 @@
               var item = {"name":"txhash","type":"bytes","value":result.hash};
               var inputRow = createInputRow(item, readOnly);
               section.appendChild(inputRow);
-              if( isSupportedByEtherscan() ) {
-                 var anchor = createTxHashLink(result.hash); 
-                 section.appendChild(anchor);
+
+              const anchor = createTxHashLink(result.hash);
+              if( anchor ){
+                  section.appendChild(anchor);
               }
            }
        }
 
        function isSupportedByEtherscan() {
-          return( ["ropsten", "homestead"].includes(getNetwork()) );
+          return( ["ropsten", "homestead"].includes(network) );
        }
 
        function createTxHashLink(hash){
-           var prefix = getNetworkPrefix();
-           var href = "https://" + prefix + "etherscan.io/tx/" + hash;
-           var anchor = document.createElement("a");
-           anchor.href = href;
-           anchor.target = "_blank";
-           anchor.textContent = href;
-           return anchor; 
+         let anchor = null;
+         const href = getEtherscanUrl("tx", hash);
+
+         if( href ) {
+            const anchor = document.createElement("a");
+            anchor.href = href;
+            anchor.target = "_blank";
+            anchor.textContent = href;
+         }
+         return anchor;
        }
 
        function getArgumentValues() {
