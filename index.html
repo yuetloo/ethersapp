@@ -690,7 +690,7 @@
                   var placeholder = "Amount in ETH to send to the contract";
                   var item = {
                                 "name": "Value",
-                                "type": "uint256",
+                                "type": "ETH",
                                 "placeholder": placeholder,
                                 "class": "tx-value"
                              }
@@ -1113,8 +1113,9 @@
           var selector = "#input-section input";
           var inputs = document.querySelectorAll(selector);
           inputs.forEach( i => {
-              args.push(( i.classList.contains("tx-value")? { "value": ethers.parseEther(i.value) } : i.value ));
+              args.push(( i.classList.contains("tx-value")? { "value": ethers.utils.parseEther(i.value) } : i.value ));
           });
+          console.log('args', args)
           return args;
        }
 
@@ -1188,6 +1189,18 @@
           return result;
        }
 
+       function isValidETH(val) {
+          const result = { valid: true };
+          try {
+             const wei = ethers.utils.parseEther(val);
+          } catch (e) {
+            result.valid = false;
+            result.message = "Invalid amount in ETH: " + val;
+          }
+
+          return result;
+       }
+
        function isValid(val, type) {
           var result = {};
           result.valid = true;
@@ -1205,6 +1218,8 @@
              result = isValidAbi(trimmedValue);
           } else if( type.indexOf("uint") >= 0 ) {
              result = isValidUint(val, type);
+          } else if( type === "ETH" ) {
+             result = isValidETH(val);
           }
 
           return result;
