@@ -1113,7 +1113,7 @@
           var selector = "#input-section input";
           var inputs = document.querySelectorAll(selector);
           inputs.forEach( i => {
-              args.push(( i.classList.contains("tx-value")? { "value": ethers.utils.parseEther(i.value) } : i.value ));
+              args.push(( i.classList.contains("tx-value")? { "value": ethers.utils.parseEther(i.value) } : JSON.parse(i.value) ));
           });
           console.log('args', args)
           return args;
