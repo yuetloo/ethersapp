@@ -1216,8 +1216,9 @@
              }
           } else if( type === "abi" ) {
              result = isValidAbi(trimmedValue);
-          } else if( type.indexOf("uint") >= 0 ) {
-             result = isValidUint(val, type);
+          //}
+          //} else if( type.indexOf("uint") >= 0 ) {
+          //   result = isValidUint(val, type);
           } else if( type === "ETH" ) {
              result = isValidETH(val);
           }
