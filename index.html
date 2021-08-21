@@ -718,6 +718,9 @@
          label.textContent = (item.name? item.name: "") + " (" + item.type + "):";
          var inputElement = document.createElement("input");
          inputElement.setAttribute("data", item.type);
+         if(item.baseType) {
+            inputElement.setAttribute("data", item.baseType);
+         }
          if( item.value != undefined ) {
             inputElement.value = item.value;
          }
@@ -729,8 +732,8 @@
          }
          if( readOnly ) {
             inputElement.readOnly = true;
-         } 
-   
+         }
+
          var error = document.createElement("div");
          error.classList.add("error");
          row.appendChild(label);
@@ -1108,13 +1111,24 @@
          return anchor;
        }
 
+       const COMPLEX_TYPES = new Set(['array', 'tuple'])
+       function formatArgumentValue(item) {
+          console.log('.....item', item)
+         if( item.classList.contains("tx-value") ) {
+            return  { "value": ethers.utils.parseEther(i.value) }
+          } else if( COMPLEX_TYPES.has(item.getAttribute('data')) ) {
+            return JSON.parse(item.value);
+          } else {
+            return item.value;
+          }
+       }
+
        function getArgumentValues() {
-          var args = [];
           var selector = "#input-section input";
           var inputs = document.querySelectorAll(selector);
-          inputs.forEach( i => {
-              args.push(( i.classList.contains("tx-value")? { "value": ethers.utils.parseEther(i.value) } : JSON.parse(i.value) ));
-          });
+          console.log('....inputs', inputs)
+          
+          const args = Array.from(inputs).map(item => formatArgumentValue(item))
           console.log('args', args)
           return args;
        }
@@ -1216,9 +1230,8 @@
              }
           } else if( type === "abi" ) {
              result = isValidAbi(trimmedValue);
-          //}
-          //} else if( type.indexOf("uint") >= 0 ) {
-          //   result = isValidUint(val, type);
+          } else if( type.indexOf("uint") >= 0 ) {
+             result = isValidUint(val, type);
           } else if( type === "ETH" ) {
              result = isValidETH(val);
           }
