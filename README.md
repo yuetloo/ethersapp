@@ -7,7 +7,7 @@ To access mainnet, use the following URL:
 
 # Purpose
 
-ethersapp was created to help me learn about ethereum contracts.
+To provide a simple interface to interact with Ethereum smart contracts.
 
 # Security
 
